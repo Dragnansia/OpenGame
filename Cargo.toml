@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 clap = "2.33.3"
 flate2 = "1.0.22"
+dirs = "4.0.0"

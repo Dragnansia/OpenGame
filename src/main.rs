@@ -29,6 +29,7 @@ fn matches_argument() -> ArgMatches<'static> {
 }
 
 fn main() {
+    let steam = steam::init_steam_data();
     let matches = matches_argument();
 
     if let Some(matches) = matches.subcommand_matches("proton") {
