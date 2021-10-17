@@ -1,5 +1,8 @@
 use clap::{App, Arg, ArgMatches, SubCommand};
 
+mod steam;
+mod proton;
+
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
         .version("0.0.1")
@@ -30,15 +33,15 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("proton") {
         if matches.is_present("install") {
-            println!("Install {}", matches.value_of("install").unwrap());
+            proton::install_version(matches.value_of("install").unwrap());
         }
 
         if matches.is_present("remove") {
-            println!("Remove {}", matches.value_of("remove").unwrap());
+            proton::remove_version(matches.value_of("remove").unwrap());
         }
 
         if matches.is_present("list") {
-            println!("List");
+            proton::list_version();
         }
     }
 }
