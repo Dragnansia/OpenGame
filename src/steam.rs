@@ -8,6 +8,12 @@ pub struct Steam {
     _proton_version: Vec<String>,
 }
 
+impl Steam {
+    pub fn is_installed(&self, version: &String) -> bool {
+        self._proton_version.contains(version)
+    }
+}
+
 pub fn init_steam_data() -> Steam {
     let steam_path = find_steam_path();
     let proton_path = parse_proton_path(&steam_path);
@@ -49,8 +55,7 @@ fn get_all_proton_version_install(proton_path: &String) -> std::io::Result<Vec<S
     let mut array: Vec<String> = Vec::new();
     for pe in fs::read_dir(proton_path)? {
         let pe = pe?;
-        array.push(pe.path().display().to_string());
-        println!("path: {}", pe.path().display());
+        array.push(pe.path().file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
     }
 
     Ok(array)

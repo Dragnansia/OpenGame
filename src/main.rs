@@ -34,15 +34,15 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("proton") {
         if matches.is_present("install") {
-            proton::install_version(matches.value_of("install").unwrap());
+            proton::install_version(matches.value_of("install").unwrap(), &steam);
         }
 
         if matches.is_present("remove") {
-            proton::remove_version(matches.value_of("remove").unwrap());
+            proton::remove_version(matches.value_of("remove").unwrap(), &steam);
         }
 
         if matches.is_present("list") {
-            proton::list_version();
+            proton::list_version(&steam);
         }
     }
 }
