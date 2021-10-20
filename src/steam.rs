@@ -1,5 +1,5 @@
 use std::path::Path;
-use dirs::{self, home_dir};
+use home::home_dir;
 use std::fs;
 
 pub struct Steam {
