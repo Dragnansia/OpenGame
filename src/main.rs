@@ -1,30 +1,39 @@
 use clap::{App, Arg, ArgMatches, SubCommand};
 
-mod steam;
+mod net;
 mod proton;
+mod steam;
 
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
         .version("0.0.1")
         .author("RomualdAuc")
         .about("A simple program to install gaming dependencies on linux computer")
-        .subcommand(SubCommand::with_name("proton")
-                    .about("ProtonGE gestion (Install / Remove / List)")
-                    .arg(Arg::with_name("install")
-                         .short("i")
-                         .long("install")
-                         .help("Install a specific version of ProtonGE")
-                         .takes_value(true))
-                    .arg(Arg::with_name("list")
-                         .short("l")
-                         .long("list")
-                         .help("Print all version of proton install")
-                         .takes_value(false))
-                    .arg(Arg::with_name("remove")
-                         .short("r")
-                         .long("remove")
-                         .help("Remove a specific version")
-                         .takes_value(true)))
+        .subcommand(
+            SubCommand::with_name("proton")
+                .about("ProtonGE gestion (Install / Remove / List)")
+                .arg(
+                    Arg::with_name("install")
+                        .short("i")
+                        .long("install")
+                        .help("Install a specific version of ProtonGE")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("list")
+                        .short("l")
+                        .long("list")
+                        .help("Print all version of proton install")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("remove")
+                        .short("r")
+                        .long("remove")
+                        .help("Remove a specific version")
+                        .takes_value(true),
+                ),
+        )
         .get_matches()
 }
 
