@@ -3,14 +3,14 @@ use std::fs;
 use std::path::Path;
 
 pub struct Steam {
-    _path: String,
-    _proton_path: String,
-    _proton_version: Vec<String>,
+    pub _path: String,
+    pub _proton_path: String,
+    pub _proton_version: Vec<String>,
 }
 
 impl Steam {
-    pub fn is_installed(&self, version: &String) -> bool {
-        self._proton_version.contains(version)
+    pub fn is_installed(&self, version: String) -> bool {
+        self._proton_version.contains(&version)
     }
 }
 
@@ -42,7 +42,7 @@ fn parse_proton_path(_steam_path: &String) -> String {
     let mut proton_path = _steam_path.clone();
     proton_path.push_str("root/compatibilitytools.d/");
     if !Path::new(&proton_path).exists() {
-        match fs::create_dir_all(proton_path.clone()).is_ok() {
+        match fs::create_dir_all(&proton_path).is_ok() {
             true => println!("-> compatibilitytools.d directory is create"),
             false => println!("-> Can't create compatibilitytools.d directory on steam folder"),
         }
