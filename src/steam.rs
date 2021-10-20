@@ -1,6 +1,6 @@
-use std::path::Path;
 use home::home_dir;
 use std::fs;
+use std::path::Path;
 
 pub struct Steam {
     _path: String,
@@ -20,7 +20,7 @@ pub fn init_steam_data() -> Steam {
     Steam {
         _path: steam_path.clone(),
         _proton_path: proton_path.clone(),
-        _proton_version: get_all_proton_version_install(&proton_path).unwrap_or_default()
+        _proton_version: get_all_proton_version_install(&proton_path).unwrap_or_default(),
     }
 }
 
@@ -44,7 +44,7 @@ fn parse_proton_path(_steam_path: &String) -> String {
     if !Path::new(&proton_path).exists() {
         match fs::create_dir_all(proton_path.clone()).is_ok() {
             true => println!("-> compatibilitytools.d directory is create"),
-            false => println!("-> Can't create compatibilitytools.d directory on steam folder")
+            false => println!("-> Can't create compatibilitytools.d directory on steam folder"),
         }
     }
 
@@ -55,7 +55,14 @@ fn get_all_proton_version_install(proton_path: &String) -> std::io::Result<Vec<S
     let mut array: Vec<String> = Vec::new();
     for pe in fs::read_dir(proton_path)? {
         let pe = pe?;
-        array.push(pe.path().file_name().unwrap_or_default().to_str().unwrap_or_default().to_string());
+        array.push(
+            pe.path()
+                .file_name()
+                .unwrap_or_default()
+                .to_str()
+                .unwrap_or_default()
+                .to_string(),
+        );
     }
 
     Ok(array)
