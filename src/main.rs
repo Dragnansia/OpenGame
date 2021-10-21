@@ -20,6 +20,13 @@ fn matches_argument() -> ArgMatches<'static> {
                         .takes_value(true),
                 )
                 .arg(
+                    Arg::with_name("archive")
+                        .short("a")
+                        .long("archive")
+                        .help("Install archive with the path")
+                        .takes_value(true),
+                )
+                .arg(
                     Arg::with_name("list")
                         .short("l")
                         .long("list")
@@ -52,6 +59,10 @@ fn main() {
 
         if matches.is_present("list") {
             proton::list_version(&steam);
+        }
+
+        if matches.is_present("archive") {
+            proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
         }
     }
 }
