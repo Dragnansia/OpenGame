@@ -15,7 +15,7 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
     for r in arr {
         let tag_name = r["tag_name"].as_str().unwrap();
         if tag_name.starts_with(_version_name)
-            && !_steam.is_installed(format!("Proton-{}", tag_name).to_string())
+            && !_steam.is_installed(&format!("Proton-{}", tag_name).to_string())
         {
             let assets = r["assets"].as_array().unwrap();
             for a in assets {
@@ -57,7 +57,19 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     println!("-> Installation of {} is finish", path);
 }
 
-pub fn remove_version(_version_name: &str, _steam: &Steam) {}
+pub fn remove_version(_version_name: &str, _steam: &Steam) {
+    let folder_name = format!("Proton-{}", _version_name).to_string();
+    if _steam.is_installed(&folder_name) {
+        let res = fs::remove_dir_all(&format!("{}{}", _steam._proton_path, &folder_name));
+
+        if res.is_err() {
+            println!("-> Error: {}", res.err().unwrap());
+            return;
+        }
+    } else {
+        println!("-> {} is not install", _version_name);
+    }
+}
 
 pub fn list_version(_steam: &Steam) {
     println!("-> Proton version installed:");

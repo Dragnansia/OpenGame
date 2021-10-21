@@ -9,8 +9,8 @@ pub struct Steam {
 }
 
 impl Steam {
-    pub fn is_installed(&self, version: String) -> bool {
-        self._proton_version.contains(&version)
+    pub fn is_installed(&self, version: &String) -> bool {
+        self._proton_version.contains(version)
     }
 }
 
