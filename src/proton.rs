@@ -36,12 +36,7 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
                     let url = a["browser_download_url"].as_str().unwrap().clone();
                     let final_path = format!("{}{}", path, name);
                     net::download_file(url, &final_path);
-
-                    let tar_gz = File::open(&final_path).unwrap();
-                    let tar = GzDecoder::new(tar_gz);
-                    let mut archive = Archive::new(tar);
-                    println!("-> Extract {}", &final_path);
-                    let _ = archive.unpack(&_steam._proton_path);
+                    install_archive_version(&final_path, _steam);
 
                     break;
                 }
