@@ -1,6 +1,7 @@
 use crate::{net, steam::Steam};
 use flate2::read::GzDecoder;
 use home::home_dir;
+use serde_json::Value;
 use std::fs::{self, File};
 use std::path::Path;
 use tar::Archive;
@@ -15,32 +16,10 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
     for r in arr {
         let tag_name = r["tag_name"].as_str().unwrap();
         if tag_name.starts_with(_version_name)
-            && !_steam.is_installed(&format!("Proton-{}", tag_name).to_string())
+            && !_steam.is_installed(&format!("Proton-{}", tag_name))
         {
             let assets = r["assets"].as_array().unwrap();
-            for a in assets {
-                let name = a["name"].as_str().unwrap();
-                if name.ends_with(".tar.gz") {
-                    let mut path = String::from("");
-                    match home_dir() {
-                        Some(dir) => {
-                            path = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR)
-                        }
-                        None => println!(""),
-                    }
-
-                    if !Path::new(&path).exists() {
-                        let _ = fs::create_dir_all(TMP_DIR);
-                    }
-
-                    let url = a["browser_download_url"].as_str().unwrap().clone();
-                    let final_path = format!("{}{}", path, name);
-                    net::download_file(url, &final_path);
-                    install_archive_version(&final_path, _steam);
-
-                    break;
-                }
-            }
+            download_and_install_proton(assets, _steam);
 
             println!("-> Installation of {} is finish", tag_name);
             break;
@@ -55,6 +34,44 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     println!("-> Extract {}", &path);
     let _ = archive.unpack(&_steam._proton_path);
     println!("-> Installation of {} is finish", path);
+}
+
+fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
+    for a in assets {
+        let name = a["name"].as_str().unwrap();
+        if name.ends_with(".tar.gz") {
+            let mut path = String::from("");
+            match home_dir() {
+                Some(dir) => path = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR),
+                None => println!(""),
+            }
+
+            if !Path::new(&path).exists() {
+                let _ = fs::create_dir_all(TMP_DIR);
+            }
+
+            let url = a["browser_download_url"].as_str().unwrap().clone();
+            let final_path = format!("{}{}", path, name);
+            net::download_file(url, &final_path);
+            install_archive_version(&final_path, _steam);
+
+            break;
+        }
+    }
+}
+
+pub fn update_protonge(_steam: &Steam) {
+    let res = net::get(&format!("{}{}", GITHUB_API, "?per_page=1"));
+    let last_release = &res.as_array().unwrap()[0];
+
+    let name_release = last_release["tag_name"].as_str().unwrap();
+    if !_steam.is_installed(&format!("Proton-{}", name_release)) {
+        let assets = last_release["assets"].as_array().unwrap();
+        download_and_install_proton(assets, _steam);
+        println!("-> Installation of {} is finish", name_release);
+    } else {
+        println!("-> The latest ProtonGE version is already install");
+    }
 }
 
 pub fn remove_version(_version_name: &str, _steam: &Steam) {

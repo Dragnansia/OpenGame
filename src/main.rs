@@ -20,6 +20,13 @@ fn matches_argument() -> ArgMatches<'static> {
                         .takes_value(true),
                 )
                 .arg(
+                    Arg::with_name("update")
+                        .short("u")
+                        .long("update")
+                        .help("Install latest ProtonGE version")
+                        .takes_value(false),
+                )
+                .arg(
                     Arg::with_name("archive")
                         .short("a")
                         .long("archive")
@@ -63,6 +70,10 @@ fn main() {
 
         if matches.is_present("archive") {
             proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
+        }
+
+        if matches.is_present("update") {
+            proton::update_protonge(&steam);
         }
     }
 }
