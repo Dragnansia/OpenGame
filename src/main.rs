@@ -46,6 +46,13 @@ fn matches_argument() -> ArgMatches<'static> {
                         .long("remove")
                         .help("Remove a specific version")
                         .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("clean")
+                        .short("c")
+                        .long("clean")
+                        .help("remove the cache dir of protonge")
+                        .takes_value(false),
                 ),
         )
         .get_matches()
@@ -74,6 +81,10 @@ fn main() {
 
         if matches.is_present("update") {
             proton::update_protonge(&steam);
+        }
+
+        if matches.is_present("clean") {
+            proton::remove_cache();
         }
     }
 }

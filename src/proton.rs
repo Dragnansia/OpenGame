@@ -7,7 +7,26 @@ use std::path::Path;
 use tar::Archive;
 
 const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";
-const TMP_DIR: &str = "/.local/share/og/tmp/";
+const TMP_DIR: &str = "/.cache/og/protonge/";
+
+pub fn remove_cache() {
+    let mut p = String::from("");
+    match home_dir() {
+        Some(dir) => p = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR),
+        None => println!(""),
+    }
+
+    let path = Path::new(&p);
+    if path.exists() {
+        let res = fs::remove_dir_all(path);
+
+        if res.is_ok() {
+            println!("-> Cache folder for proton ge is removed");
+        } else if res.is_err() {
+            println!("-> Can't remove cache folder: {}", res.err().unwrap());
+        }
+    }
+}
 
 pub fn install_version(_version_name: &str, _steam: &Steam) {
     let releases = net::get(GITHUB_API);
@@ -47,7 +66,7 @@ fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
             }
 
             if !Path::new(&path).exists() {
-                let _ = fs::create_dir_all(TMP_DIR);
+                let _ = fs::create_dir_all(&path);
             }
 
             let url = a["browser_download_url"].as_str().unwrap().clone();
