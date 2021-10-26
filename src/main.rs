@@ -1,8 +1,9 @@
-use clap::{App, Arg, ArgMatches, SubCommand};
-
 mod net;
 mod proton;
 mod steam;
+
+use clap::{App, Arg, ArgMatches, SubCommand};
+use steam::Steam;
 
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
@@ -59,7 +60,7 @@ fn matches_argument() -> ArgMatches<'static> {
 }
 
 fn main() {
-    let steam = steam::init_steam_data();
+    let steam = Steam::new();
     let matches = matches_argument();
 
     if let Some(matches) = matches.subcommand_matches("proton") {
