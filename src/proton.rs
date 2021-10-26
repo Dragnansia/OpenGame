@@ -21,7 +21,8 @@ pub fn remove_cache() {
         let res = fs::remove_dir_all(path);
 
         if res.is_ok() {
-            println!("-> Cache folder for proton ge is removed");
+            fs::create_dir_all(&path);
+            println!("-> Cache folder for ProtonGE is removed");
         } else if res.is_err() {
             println!("-> Can't remove cache folder: {}", res.err().unwrap());
         }
