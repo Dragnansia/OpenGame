@@ -54,6 +54,7 @@ pub fn download_file(url: &str, path: &str) {
         pb.set_style(ProgressStyle::default_bar()
             .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
             .progress_chars("#>-"));
+        // TODO change download message and just print proton version and not url
         pb.set_message(format!("-> Downloading {}", &u));
 
         let mut file = File::create(path).or(Err(format!("-> Failed to create file '{}'", p))).unwrap();
