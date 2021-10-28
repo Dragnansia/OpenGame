@@ -1,4 +1,6 @@
+mod log;
 mod net;
+mod pckg;
 mod proton;
 mod steam;
 
@@ -56,36 +58,59 @@ fn matches_argument() -> ArgMatches<'static> {
                         .takes_value(false),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("gaming")
+                .about("Install gaming dependencies")
+                .arg(
+                    Arg::with_name("lutris")
+                        .short("l")
+                        .long("lutris")
+                        .help("Install lutris package")
+                        .takes_value(false),
+                ),
+        )
         .get_matches()
 }
 
 fn main() {
-    let steam = Steam::new();
-    let matches = matches_argument();
+    match Steam::new() {
+        Ok(steam) => {
+            let matches = matches_argument();
 
-    if let Some(matches) = matches.subcommand_matches("proton") {
-        if matches.is_present("install") {
-            proton::install_version(matches.value_of("install").unwrap(), &steam);
-        }
+            if let Some(matches) = matches.subcommand_matches("proton") {
+                if matches.is_present("install") {
+                    proton::install_version(matches.value_of("install").unwrap(), &steam);
+                }
+                if matches.is_present("remove") {
+                    proton::remove_version(matches.value_of("remove").unwrap(), &steam);
+                }
+                if matches.is_present("list") {
+                    proton::list_version(&steam);
+                }
+                if matches.is_present("archive") {
+                    proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
+                }
+                if matches.is_present("update") {
+                    proton::update_protonge(&steam);
+                }
+                if matches.is_present("clean") {
+                    proton::remove_cache();
+                }
+            }
 
-        if matches.is_present("remove") {
-            proton::remove_version(matches.value_of("remove").unwrap(), &steam);
-        }
+            if let Some(matches) = matches.subcommand_matches("gaming") {
+                let installer = pckg::find_installer();
+                match installer {
+                    Ok(n) => n.installer.install_dependencies(n.commands),
+                    Err(err) => log::error(err),
+                }
 
-        if matches.is_present("list") {
-            proton::list_version(&steam);
+                if matches.args.len() == 0 {
+                    log::log("Start full installationé");
+                } else {
+                }
+            }
         }
-
-        if matches.is_present("archive") {
-            proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
-        }
-
-        if matches.is_present("update") {
-            proton::update_protonge(&steam);
-        }
-
-        if matches.is_present("clean") {
-            proton::remove_cache();
-        }
+        Err(e) => log::error(e),
     }
 }

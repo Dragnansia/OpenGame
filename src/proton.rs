@@ -13,7 +13,7 @@ pub fn remove_cache() {
     let mut p = String::from("");
     match home_dir() {
         Some(dir) => p = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR),
-        None => println!(""),
+        None => log::error("Home dir is not found"),
     }
 
     let path = Path::new(&p);

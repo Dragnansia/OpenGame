@@ -1,4 +1,6 @@
+use crate::log;
 use home::home_dir;
+use nix::unistd::geteuid;
 use std::fs;
 use std::path::Path;
 
@@ -9,13 +11,17 @@ pub struct Steam {
 }
 
 impl Steam {
-    pub fn new() -> Steam {
-        let steam_path = Steam::fpath();
-        let proton_path = Steam::ppath(&steam_path);
-        Steam {
-            _path: steam_path.clone(),
-            _proton_path: proton_path.clone(),
-            _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+    pub fn new() -> Result<Steam, &'static str> {
+        if geteuid().is_root() {
+            Err("Can't run steam search with sudo privileged")
+        } else {
+            let steam_path = Steam::fpath();
+            let proton_path = Steam::ppath(&steam_path);
+            Ok(Steam {
+                _path: steam_path.clone(),
+                _proton_path: proton_path.clone(),
+                _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+            })
         }
     }
 
@@ -35,13 +41,20 @@ impl Steam {
     }
 
     // Parse steam apth to get proton path
-    fn ppath(_steam_path: &String) -> String {
-        let mut proton_path = _steam_path.clone();
+    fn ppath(steam_path: &String) -> String {
+        let mut proton_path = steam_path.clone();
         proton_path.push_str("root/compatibilitytools.d/");
+        println!("{}", proton_path);
         if !Path::new(&proton_path).exists() {
             match fs::create_dir_all(&proton_path).is_ok() {
-                true => println!("-> compatibilitytools.d directory is create"),
-                false => println!("-> Can't create compatibilitytools.d directory on steam folder"),
+                true => log::log(&format!(
+                    "compatibilitytools.d directory is create at {}",
+                    steam_path
+                )),
+                false => log::error(&format!(
+                    "-> Can't create compatibilitytools.d directory on this directory {}",
+                    steam_path
+                )),
             }
         }
 
