@@ -10,7 +10,7 @@ pub fn run_commands(root: &str, cmds: &Vec<String>) {
         let res = Command::new(root).args(args).status();
 
         match res {
-            Ok(o) => log::success("No error on this command"),
+            Ok(_o) => log::success("No error on this command"),
             Err(_e) => log::error(&_e.to_string()),
         }
     }

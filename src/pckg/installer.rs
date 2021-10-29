@@ -15,11 +15,12 @@ impl Installer {
         let mut rt = String::new();
 
         for root in roots_list {
-            let res = Command::new("command").arg("-v").arg(root).status();
+            let res = Command::new("command").arg("-v").arg(root).output();
 
             match res {
-                Ok(r) => {
+                Ok(_r) => {
                     rt = root.to_string();
+                    log::success(&format!("root command is {}", root));
                     break;
                 }
                 Err(_e) => {}
@@ -42,9 +43,9 @@ impl Installer {
 
         match res {
             Ok(r) => {
-                log::success("Find distro id");
                 let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
                 let distro_name = &distro_utf8[..distro_utf8.len() - 1];
+                log::success(&format!("Current distro is {}", distro_name));
 
                 match distro_name {
                     "Fedora" => {

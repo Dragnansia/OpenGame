@@ -9,9 +9,12 @@ pub fn all_commands() -> Vec<String> {
     match res {
         Ok(r) => {
             fedora_version = String::from_utf8(r.stdout).unwrap_or_default();
-            log::success(&format!("Fedora version {}", fedora_version));
+            log::success(&format!(
+                "Fedora version {}",
+                &fedora_version[..fedora_version.len() - 1]
+            ));
         }
-        Err(e) => log::error("Can't get fedora version with lsb_release command"),
+        Err(_e) => log::error("Can't get fedora version with lsb_release command"),
     }
 
     [

@@ -5,7 +5,6 @@ mod proton;
 mod steam;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
-use log::error;
 use steam::Steam;
 
 fn matches_argument() -> ArgMatches<'static> {
