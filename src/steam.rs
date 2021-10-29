@@ -44,7 +44,6 @@ impl Steam {
     fn ppath(steam_path: &String) -> String {
         let mut proton_path = steam_path.clone();
         proton_path.push_str("root/compatibilitytools.d/");
-        println!("{}", proton_path);
         if !Path::new(&proton_path).exists() {
             match fs::create_dir_all(&proton_path).is_ok() {
                 true => log::log(&format!(

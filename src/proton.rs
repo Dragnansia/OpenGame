@@ -23,7 +23,7 @@ pub fn remove_cache() {
 
         if res.is_ok() {
             let _ = fs::create_dir_all(&path);
-            log::log("Cache folder for ProtonGE is removed");
+            log::success("Cache folder for ProtonGE is removed");
         } else if res.is_err() {
             log::error(&format!(
                 "Can't remove cache folder: {}",
@@ -45,7 +45,7 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
             let assets = r["assets"].as_array().unwrap();
             download_and_install_proton(assets, _steam);
 
-            log::log(&format!("Installation of {} is finish", tag_name));
+            log::success(&format!("Installation of {} is finish", tag_name));
             break;
         }
     }
@@ -57,7 +57,7 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     let mut archive = Archive::new(tar);
     log::log(&format!("Extract {}", &path));
     let _ = archive.unpack(&_steam._proton_path);
-    log::log(&format!("Installation of {} is finish", path));
+    log::success(&format!("Installation of {} is finish", path));
 }
 
 fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
@@ -92,7 +92,7 @@ pub fn update_protonge(_steam: &Steam) {
     if !_steam.is_installed(&format!("Proton-{}", name_release)) {
         let assets = last_release["assets"].as_array().unwrap();
         download_and_install_proton(assets, _steam);
-        log::log(&format!("Installation of {} is finish", name_release));
+        log::success(&format!("Installation of {} is finish", name_release));
     } else {
         log::warning("The latest ProtonGE version is already install");
     }
@@ -105,7 +105,8 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
 
         if res.is_err() {
             log::error(&res.err().unwrap().to_string());
-            return;
+        } else {
+            log::success(&format!("{} is removed", _version_name));
         }
     } else {
         log::warning(&format!("{} is not install", _version_name));

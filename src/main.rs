@@ -73,10 +73,10 @@ fn matches_argument() -> ArgMatches<'static> {
 }
 
 fn main() {
+    let matches = matches_argument();
+
     match Steam::new() {
         Ok(steam) => {
-            let matches = matches_argument();
-
             if let Some(matches) = matches.subcommand_matches("proton") {
                 if matches.is_present("install") {
                     proton::install_version(matches.value_of("install").unwrap(), &steam);
@@ -98,19 +98,23 @@ fn main() {
                 }
             }
 
+            if let Some(_matches) = matches.subcommand_matches("gaming") {
+                log::warning("Please run this command on root");
+            }
+        }
+        Err(_e) => {
             if let Some(matches) = matches.subcommand_matches("gaming") {
-                let installer = pckg::find_installer();
-                match installer {
-                    Ok(n) => n.installer.install_dependencies(n.commands),
-                    Err(err) => log::error(err),
-                }
+                let mut installer = pckg::installer::Installer::new();
+                installer = installer.find_all_commands();
 
                 if matches.args.len() == 0 {
-                    log::log("Start full installationé");
+                    pckg::run_commands(&installer.root, &installer.commands["all"]);
                 } else {
+                    if matches.is_present("lutris") {
+                        pckg::run_commands(&installer.root, &installer.commands["lutris"]);
+                    }
                 }
             }
         }
-        Err(e) => log::error(e),
     }
 }

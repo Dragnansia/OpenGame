@@ -1,16 +1,21 @@
 use colored::*;
 
+/// Print a simple log
 pub fn log(message: &str) {
-    let arrow = "[Log]".white();
-    println!("{} {}", arrow, message.white());
+    println!("{} {}", "[Log]".white(), message.white());
 }
 
+/// Print error message
 pub fn error(message: &str) {
-    let arrow = "[Error]".red();
-    println!("{} {}", arrow, message.red());
+    println!("{} {}", "[Error]".red(), message.red());
 }
 
+/// Print warning message
 pub fn warning(message: &str) {
-    let arrow = "[Warning]".yellow();
-    println!("{} {}", arrow, message.yellow());
+    println!("{} {}", "[Warning]".yellow(), message.yellow());
+}
+
+/// Print a success message
+pub fn success(message: &str) {
+    println!("{} {}", "[Success]".green(), message.green());
 }
