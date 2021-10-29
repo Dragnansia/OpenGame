@@ -13,7 +13,7 @@ pub struct Steam {
 impl Steam {
     pub fn new() -> Result<Steam, &'static str> {
         if geteuid().is_root() {
-            Err("Can't run steam search with sudo privileged")
+            Err("root privileged detected")
         } else {
             let steam_path = Steam::fpath();
             let proton_path = Steam::ppath(&steam_path);

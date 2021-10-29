@@ -5,6 +5,7 @@ mod proton;
 mod steam;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use log::error;
 use steam::Steam;
 
 fn matches_argument() -> ArgMatches<'static> {
@@ -81,39 +82,40 @@ fn main() {
                 if matches.is_present("install") {
                     proton::install_version(matches.value_of("install").unwrap(), &steam);
                 }
+
                 if matches.is_present("remove") {
                     proton::remove_version(matches.value_of("remove").unwrap(), &steam);
                 }
+
                 if matches.is_present("list") {
                     proton::list_version(&steam);
                 }
+
                 if matches.is_present("archive") {
                     proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
                 }
+
                 if matches.is_present("update") {
                     proton::update_protonge(&steam);
                 }
+
                 if matches.is_present("clean") {
                     proton::remove_cache();
                 }
             }
-
-            if let Some(_matches) = matches.subcommand_matches("gaming") {
-                log::warning("Please run this command on root");
-            }
         }
-        Err(_e) => {
-            if let Some(matches) = matches.subcommand_matches("gaming") {
-                let mut installer = pckg::installer::Installer::new();
-                installer = installer.find_all_commands();
+        Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
+    }
 
-                if matches.args.len() == 0 {
-                    pckg::run_commands(&installer.root, &installer.commands["all"]);
-                } else {
-                    if matches.is_present("lutris") {
-                        pckg::run_commands(&installer.root, &installer.commands["lutris"]);
-                    }
-                }
+    if let Some(matches) = matches.subcommand_matches("gaming") {
+        let mut installer = pckg::installer::Installer::new();
+        installer = installer.find_all_commands();
+
+        if matches.args.len() == 0 {
+            pckg::run_commands(&installer.root, &installer.commands["all"]);
+        } else {
+            if matches.is_present("lutris") {
+                pckg::run_commands(&installer.root, &installer.commands["lutris"]);
             }
         }
     }

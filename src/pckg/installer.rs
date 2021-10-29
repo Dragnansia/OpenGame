@@ -11,15 +11,19 @@ pub struct Installer {
 
 impl Installer {
     pub fn new() -> Installer {
-        let res = Command::new("/home/romuald/.local/share/og/find_root").output();
-
+        let roots_list = ["sudo", "doas", "su"];
         let mut rt = String::new();
-        match res {
-            Ok(val) => {
-                rt = String::from_utf8(val.stdout).unwrap_or_default();
-                log::success("Root command is found");
+
+        for root in roots_list {
+            let res = Command::new("command").arg("-v").arg(root).status();
+
+            match res {
+                Ok(r) => {
+                    rt = root.to_string();
+                    break;
+                }
+                Err(_e) => {}
             }
-            Err(e) => log::error(&e.to_string()),
         }
 
         Installer {
