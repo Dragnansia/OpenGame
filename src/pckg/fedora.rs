@@ -1,10 +1,18 @@
 use std::process::Command;
 
+use crate::log;
+
 pub fn all_commands() -> Vec<String> {
-    //TODO: Get the current fedora version number
-    let res = String::from_utf8(Command::new("lsb_release -rs").output().unwrap().stdout)
-        .unwrap_or_default();
-    let fedora_version = &res[0..res.len() - 1];
+    let res = Command::new("lsb_release").arg("-rs").output();
+    let mut fedora_version = String::new();
+
+    match res {
+        Ok(r) => {
+            fedora_version = String::from_utf8(r.stdout).unwrap_or_default();
+            log::success(&format!("Fedora version {}", fedora_version));
+        }
+        Err(e) => log::error("Can't get fedora version with lsb_release command"),
+    }
 
     [
         "dnf install redhat-lsb-core -y".to_string(),

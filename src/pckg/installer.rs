@@ -11,11 +11,14 @@ pub struct Installer {
 
 impl Installer {
     pub fn new() -> Installer {
-        let res = Command::new("~/.local/share/og/find_root").output();
+        let res = Command::new("/home/romuald/.local/share/og/find_root").output();
 
         let mut rt = String::new();
         match res {
-            Ok(val) => rt = String::from_utf8(val.stdout).unwrap_or_default(),
+            Ok(val) => {
+                rt = String::from_utf8(val.stdout).unwrap_or_default();
+                log::success("Root command is found");
+            }
             Err(e) => log::error(&e.to_string()),
         }
 
@@ -31,12 +34,13 @@ impl Installer {
     }
 
     pub fn find_all_commands(mut self: Self) -> Self {
-        let res = Command::new("lsb_release").arg("-i").output();
+        let res = Command::new("lsb_release").arg("-is").output();
 
         match res {
             Ok(r) => {
+                log::success("Find distro id");
                 let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
-                let distro_name = &distro_utf8[16..distro_utf8.len() - 1];
+                let distro_name = &distro_utf8[..distro_utf8.len() - 1];
 
                 match distro_name {
                     "Fedora" => {
