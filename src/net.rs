@@ -1,15 +1,18 @@
+use futures_util::StreamExt;
+use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::{
     self,
     header::{HeaderMap, HeaderValue},
     Client,
 };
 use serde_json::Value;
-use std::{io::Write, sync::{mpsc::channel, Arc, Mutex}};
-use tokio::runtime::Runtime;
-use indicatif::{ProgressBar, ProgressStyle};
-use futures_util::StreamExt;
 use std::cmp::min;
 use std::fs::File;
+use std::{
+    io::Write,
+    sync::{mpsc::channel, Arc, Mutex},
+};
+use tokio::runtime::Runtime;
 
 fn basic_hearders() -> HeaderMap<HeaderValue> {
     let mut headers = HeaderMap::new();
@@ -60,7 +63,7 @@ pub fn download_file(url: &str, path: &str) {
         let mut file = File::create(path).or(Err(format!("-> Failed to create file '{}'", p))).unwrap();
         let mut downloaded: u64 = 0;
         let mut stream = response.bytes_stream();
-    
+
         while let Some(item) = stream.next().await {
             let chunk = item.or(Err(format!("Error while downloading file"))).unwrap();
 
