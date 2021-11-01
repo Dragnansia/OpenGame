@@ -82,6 +82,13 @@ fn matches_argument() -> ArgMatches<'static> {
                         .long("overlay")
                         .help("Install Overlay")
                         .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("replay-sorcery")
+                        .short("r")
+                        .long("replay-sorcery")
+                        .help("Install ReplaySorcery")
+                        .takes_value(false),
                 ),
         )
         .get_matches()
@@ -138,6 +145,10 @@ fn main() {
 
             if matches.is_present("overlay") {
                 run_commands(&commands.overlay(&root));
+            }
+
+            if matches.is_present("replay-sorcery") {
+                run_commands(&commands.replay_sorcery(&root));
             }
         }
     }

@@ -1,4 +1,4 @@
-use super::installer::Installer;
+use super::installer::{temp_dir, Installer};
 use crate::log;
 use std::process::Command;
 
@@ -45,5 +45,19 @@ impl Installer for Fedora {
 
     fn overlay(&self, root: &String) -> Vec<String> {
         [format!("{} dnf install goverlay -y", root)].to_vec()
+    }
+
+    fn replay_sorcery(&self, root: &String) -> Vec<String> {
+        let destination = format!("{}ReplaySorcery", temp_dir());
+        let build_dir = format!("{}bin", destination);
+
+        [
+            format!("{} dnf install cmake ffmpeg-devel ffmpeg-libs ffmpeg libdrm libX11-devel libX11-xcb libX11", root),
+            format!("git clone --recursive -j4 https://github.com/matanui159/ReplaySorcery.git {}", destination),
+            format!("cmake -B {} -S {} -DCMAKE_BUILD_TYPE=Release", build_dir, destination),
+            format!("make -C {}", build_dir),
+            format!("{} make -C bin install", root),
+            "systemctl --user enable --now replay-sorcery".to_string()
+        ].to_vec()
     }
 }

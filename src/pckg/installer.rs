@@ -1,13 +1,20 @@
-use std::process::{exit, Command};
-
 use super::fedora::Fedora;
 use crate::log;
+use home::home_dir;
+use std::{
+    path::Path,
+    process::{exit, Command},
+};
+use tokio::fs;
+
+const TMP_DIR: &str = "/.cache/opengame/gaming/";
 
 pub trait Installer {
     fn all(&self, root: &String) -> Vec<String>;
     fn lutris(&self, root: &String) -> Vec<String>;
     fn heroic_launcher(&self, root: &String) -> Vec<String>;
     fn overlay(&self, root: &String) -> Vec<String>;
+    fn replay_sorcery(&self, root: &String) -> Vec<String>;
 }
 
 pub fn root_command() -> String {
@@ -54,4 +61,24 @@ pub fn find_installer() -> Box<dyn Installer> {
     }
 
     installer.unwrap()
+}
+
+pub fn temp_dir() -> String {
+    let hd = match home_dir() {
+        Some(dir) => dir.to_str().unwrap().to_string(),
+        None => "".to_string(),
+    };
+
+    if hd == "" {
+        log::error("No found home directory");
+        exit(-1);
+    }
+
+    let temp_dir = format!("{}{}", hd, TMP_DIR);
+    if !Path::new(&temp_dir).exists() {
+        let _ = fs::create_dir_all(&temp_dir);
+        log::success("Create temp folder");
+    }
+
+    temp_dir
 }
