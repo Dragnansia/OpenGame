@@ -5,6 +5,7 @@ mod proton;
 mod steam;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
+use pckg::{installer, run_commands};
 use steam::Steam;
 
 fn matches_argument() -> ArgMatches<'static> {
@@ -65,7 +66,21 @@ fn matches_argument() -> ArgMatches<'static> {
                     Arg::with_name("lutris")
                         .short("l")
                         .long("lutris")
-                        .help("Install lutris package")
+                        .help("Install Lutris")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("heroic")
+                        .short("h")
+                        .long("heroic")
+                        .help("Install Heroic Launcher")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("overlay")
+                        .short("o")
+                        .long("overlay")
+                        .help("Install Overlay")
                         .takes_value(false),
                 ),
         )
@@ -107,14 +122,22 @@ fn main() {
     }
 
     if let Some(matches) = matches.subcommand_matches("gaming") {
-        let mut installer = pckg::installer::Installer::new();
-        installer = installer.find_all_commands();
+        let root = installer::root_command();
+        let commands = installer::find_installer();
 
         if matches.args.len() == 0 {
-            pckg::run_commands(&installer.root, &installer.commands["all"]);
+            run_commands(&commands.all(&root));
         } else {
             if matches.is_present("lutris") {
-                pckg::run_commands(&installer.root, &installer.commands["lutris"]);
+                run_commands(&commands.lutris(&root));
+            }
+
+            if matches.is_present("heroic") {
+                run_commands(&commands.heroic_launcher(&root));
+            }
+
+            if matches.is_present("overlay") {
+                run_commands(&commands.overlay(&root));
             }
         }
     }
