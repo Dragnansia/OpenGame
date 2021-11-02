@@ -1,23 +1,17 @@
-use crate::log;
+use crate::{dir, log};
 use crate::{net, steam::Steam};
 use flate2::read::GzDecoder;
-use home::home_dir;
 use serde_json::Value;
 use std::fs::{self, File};
 use std::path::Path;
 use tar::Archive;
 
 const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";
-const TMP_DIR: &str = "/.cache/og/protonge/";
 
 pub fn remove_cache() {
-    let mut p = String::from("");
-    match home_dir() {
-        Some(dir) => p = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR),
-        None => log::error("Home dir is not found"),
-    }
-
+    let p = dir::format_tmp_dir("proton", false);
     let path = Path::new(&p);
+
     if path.exists() {
         let res = fs::remove_dir_all(path);
 
@@ -64,18 +58,10 @@ fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
     for a in assets {
         let name = a["name"].as_str().unwrap();
         if name.ends_with(".tar.gz") {
-            let mut path = String::from("");
-            match home_dir() {
-                Some(dir) => path = format!("{}{}", dir.to_str().unwrap().to_string(), TMP_DIR),
-                None => log::error("Home dir is not found"),
-            }
-
-            if !Path::new(&path).exists() {
-                let _ = fs::create_dir_all(&path);
-            }
-
-            let url = a["browser_download_url"].as_str().unwrap().clone();
+            let path = dir::format_tmp_dir("proton", true);
             let final_path = format!("{}{}", path, name);
+
+            let url = a["browser_download_url"].as_str().unwrap();
             net::download_file(url, &final_path);
             install_archive_version(&final_path, _steam);
 

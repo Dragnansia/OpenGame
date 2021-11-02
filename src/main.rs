@@ -1,3 +1,4 @@
+mod dir;
 mod log;
 mod net;
 mod pckg;

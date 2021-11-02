@@ -1,4 +1,5 @@
-use super::installer::{temp_dir, Installer};
+use super::installer::Installer;
+use crate::dir;
 use crate::log;
 use std::process::Command;
 
@@ -48,7 +49,7 @@ impl Installer for Fedora {
     }
 
     fn replay_sorcery(&self, root: &String) -> Vec<String> {
-        let destination = format!("{}ReplaySorcery", temp_dir());
+        let destination = format!("{}ReplaySorcery", dir::format_tmp_dir("gaming", true));
         let build_dir = format!("{}/bin", destination);
 
         [
