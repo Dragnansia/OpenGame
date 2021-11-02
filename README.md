@@ -6,12 +6,11 @@ OpenGame (OG) is a gaming dependencies installer for multi linux distro and prot
 <summary>Distributions</summary>
 
 + Fedora
-
 </details>
 
 <details>
 <summary>Install rust</summary>
-  
+
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
@@ -19,8 +18,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 <details>
 <summary>Other project</summary>
-  
+
 + [LibreGaming](https://github.com/Ahmed-Al-Balochi/LibreGaming)
 </details>
-
-
