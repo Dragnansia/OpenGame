@@ -1,6 +1,6 @@
 OpenGame
 ======
-OpenGame (OG) is a gaming dependencies installer for multi linux distro and proton ge installer (like protonup)
+OpenGame (OG) is a gaming dependencies installer for linux distros and ProtonGE installation (like protonup)
 
 <details>
 <summary>Distributions</summary>
@@ -9,7 +9,7 @@ OpenGame (OG) is a gaming dependencies installer for multi linux distro and prot
 </details>
 
 <details>
-<summary>Install rust</summary>
+<summary>Dependencies</summary>
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -17,7 +17,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 </details>
 
 <details>
-<summary>Other project</summary>
+<summary>Other projects</summary>
 
 + [LibreGaming](https://github.com/Ahmed-Al-Balochi/LibreGaming)
 </details>
