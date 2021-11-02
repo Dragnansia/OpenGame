@@ -8,6 +8,13 @@ mod steam;
 use clap::{App, Arg, ArgMatches, SubCommand};
 use pckg::{installer, run_commands};
 use steam::Steam;
+use termion::raw::IntoRawMode;
+use tui::{
+    backend::TermionBackend,
+    style::{Color, Modifier, Style},
+    widgets::{Block, Borders, List, ListItem},
+    Terminal,
+};
 
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
@@ -92,64 +99,78 @@ fn matches_argument() -> ArgMatches<'static> {
                         .takes_value(false),
                 ),
         )
+        .arg(
+            Arg::with_name("tui")
+                .short("t")
+                .long("tui")
+                .help("Start OpenGame on TUI mod")
+                .takes_value(false),
+        )
         .get_matches()
 }
 
 fn main() {
     let matches = matches_argument();
 
-    match Steam::new() {
-        Ok(steam) => {
-            if let Some(matches) = matches.subcommand_matches("proton") {
-                if matches.is_present("install") {
-                    proton::install_version(matches.value_of("install").unwrap(), &steam);
-                }
+    if matches.is_present("tui") {
+        // Run OpenGame with tui
+    } else {
+        match Steam::new() {
+            Ok(steam) => {
+                if let Some(matches) = matches.subcommand_matches("proton") {
+                    if matches.is_present("install") {
+                        proton::install_version(matches.value_of("install").unwrap(), &steam);
+                    }
 
-                if matches.is_present("remove") {
-                    proton::remove_version(matches.value_of("remove").unwrap(), &steam);
-                }
+                    if matches.is_present("remove") {
+                        proton::remove_version(matches.value_of("remove").unwrap(), &steam);
+                    }
 
-                if matches.is_present("list") {
-                    proton::list_version(&steam);
-                }
+                    if matches.is_present("list") {
+                        proton::list_version(&steam);
+                    }
 
-                if matches.is_present("archive") {
-                    proton::install_archive_version(matches.value_of("archive").unwrap(), &steam);
-                }
+                    if matches.is_present("archive") {
+                        proton::install_archive_version(
+                            matches.value_of("archive").unwrap(),
+                            &steam,
+                        );
+                    }
 
-                if matches.is_present("update") {
-                    proton::update_protonge(&steam);
-                }
+                    if matches.is_present("update") {
+                        proton::update_protonge(&steam);
+                    }
 
-                if matches.is_present("clean") {
-                    proton::remove_cache();
+                    if matches.is_present("clean") {
+                        proton::remove_cache();
+                    }
                 }
             }
+            Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
         }
-        Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
-    }
 
-    if let Some(matches) = matches.subcommand_matches("gaming") {
-        let root = installer::root_command();
-        let commands = installer::find_installer();
+        if let Some(matches) = matches.subcommand_matches("gaming") {
+            let root = installer::root_command();
+            let commands = installer::find_installer();
 
-        if matches.args.len() == 0 {
-            run_commands(&commands.all(&root));
-        } else {
-            if matches.is_present("lutris") {
-                run_commands(&commands.lutris(&root));
-            }
+            if matches.args.len() == 0 {
+                run_commands(&commands.all(&root));
+            } else {
+                if matches.is_present("lutris") {
+                    run_commands(&commands.lutris(&root));
+                }
 
-            if matches.is_present("heroic") {
-                run_commands(&commands.heroic_launcher(&root));
-            }
+                if matches.is_present("heroic") {
+                    run_commands(&commands.heroic_launcher(&root));
+                }
 
-            if matches.is_present("overlay") {
-                run_commands(&commands.overlay(&root));
-            }
+                if matches.is_present("overlay") {
+                    run_commands(&commands.overlay(&root));
+                }
 
-            if matches.is_present("replay-sorcery") {
-                run_commands(&commands.replay_sorcery(&root));
+                if matches.is_present("replay-sorcery") {
+                    run_commands(&commands.replay_sorcery(&root));
+                }
             }
         }
     }
