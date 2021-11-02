@@ -74,6 +74,8 @@ impl Steam {
             );
         }
 
+        array.sort();
+        array.reverse();
         Ok(array)
     }
 
