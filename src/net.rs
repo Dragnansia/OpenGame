@@ -6,13 +6,15 @@ use reqwest::{
     Client,
 };
 use serde_json::Value;
-use std::cmp::min;
 use std::fs::File;
+use std::{cmp::min, process::exit};
 use std::{
     io::Write,
     sync::{mpsc::channel, Arc, Mutex},
 };
 use tokio::runtime::Runtime;
+
+use crate::log;
 
 fn basic_hearders() -> HeaderMap<HeaderValue> {
     let mut headers = HeaderMap::new();
@@ -48,6 +50,7 @@ pub fn download_file(url: &str, path: &str) {
     rt.block_on(async move {
         let u = url_arc.lock().unwrap().to_string();
         let p = path_arc.lock().unwrap().to_string();
+        let v = p.split("/").last().unwrap();
 
         let client = Client::new();
         let response = client.get(&u).headers(basic_hearders()).send().await.unwrap();
@@ -56,11 +59,17 @@ pub fn download_file(url: &str, path: &str) {
         let pb = ProgressBar::new(size);
         pb.set_style(ProgressStyle::default_bar()
             .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-            .progress_chars("#>-"));
-        // TODO change download message and just print proton version and not url
-        pb.set_message(format!("-> Downloading {}", &u));
+            .progress_chars("#>-")); 
+        pb.set_message(format!("-> Downloading {}", v));
 
-        let mut file = File::create(path).or(Err(format!("-> Failed to create file '{}'", p))).unwrap();
+        let file_create = File::create(&p);
+        if file_create.is_err() {
+            log::error(&format!("Failed to create file: {}", &p));
+            log::error(&file_create.err().unwrap().to_string());
+            exit(-1);
+        }
+
+        let mut file = file_create.unwrap();
         let mut downloaded: u64 = 0;
         let mut stream = response.bytes_stream();
 

@@ -1,13 +1,12 @@
 use crate::log;
 use home::home_dir;
-use std::{path::Path, process::exit};
-use tokio::fs;
+use std::{fs, path::Path, process::exit};
 
 const TMP_DIR: &str = "/.cache/opengame/";
 
 pub fn format_tmp_dir(folder: &str, create_if_not_exist: bool) -> String {
     let dir = format!("{}{}/", temp_dir(), folder);
-    if create_if_not_exist {
+    if create_if_not_exist && !Path::new(&dir).exists() {
         let _ = fs::create_dir_all(&dir);
     }
 
