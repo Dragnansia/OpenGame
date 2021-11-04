@@ -100,7 +100,7 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
 }
 
 pub fn list_version(_steam: &Steam) {
-    log::log("-> Proton version installed:");
+    log::log("Proton version installed:");
     for pe in &_steam._proton_version {
         log::log(&format!("- {}", pe));
     }
