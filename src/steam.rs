@@ -11,13 +11,13 @@ pub struct Steam {
 }
 
 impl Steam {
-    pub fn new() -> Result<Steam, &'static str> {
+    pub fn new() -> Result<Self, &'static str> {
         if geteuid().is_root() {
             Err("root privileged detected")
         } else {
             let steam_path = Steam::fpath();
             let proton_path = Steam::ppath(&steam_path);
-            Ok(Steam {
+            Ok(Self {
                 _path: steam_path.clone(),
                 _proton_path: proton_path.clone(),
                 _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),

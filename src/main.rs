@@ -1,20 +1,15 @@
 mod dir;
+mod input;
 mod log;
 mod net;
 mod pckg;
 mod proton;
 mod steam;
+mod ui;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use pckg::{installer, run_commands};
 use steam::Steam;
-use termion::raw::IntoRawMode;
-use tui::{
-    backend::TermionBackend,
-    style::{Color, Modifier, Style},
-    widgets::{Block, Borders, List, ListItem},
-    Terminal,
-};
 
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
@@ -113,7 +108,7 @@ fn main() {
     let matches = matches_argument();
 
     if matches.is_present("tui") {
-        // Run OpenGame with tui
+        let _ = ui::run_display();
     } else {
         match Steam::new() {
             Ok(steam) => {
