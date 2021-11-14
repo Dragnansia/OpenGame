@@ -16,28 +16,40 @@ impl Steam {
             Err("root privileged detected")
         } else {
             let steam_path = Steam::fpath();
-            let proton_path = Steam::ppath(&steam_path);
-            Ok(Self {
-                _path: steam_path.clone(),
-                _proton_path: proton_path.clone(),
-                _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
-            })
+            let statue = match steam_path {
+                Ok(st_path) => {
+                    let proton_path = Steam::ppath(&st_path);
+                    Ok(Self {
+                        _path: st_path.clone(),
+                        _proton_path: proton_path.clone(),
+                        _proton_version: Steam::all_proton_version(&proton_path)
+                            .unwrap_or_default(),
+                    })
+                }
+                Err(err) => Err(err),
+            };
+
+            statue
         }
     }
 
     // find steam path
-    fn fpath() -> String {
+    fn fpath() -> Result<String, &'static str> {
         let home_dir = home_dir().unwrap_or_default().display().to_string();
         let mut steam_path = home_dir.clone();
         steam_path.push_str("/.steam/");
 
-        //TODO: find the path for flatpak steam
         if !Path::new(&steam_path).exists() {
             steam_path = home_dir;
-            steam_path.push_str("");
+            // TODO: find the path for flatpak steam
+            steam_path.push_str("/flatpak");
+
+            if !Path::new(&steam_path).exists() {
+                return Err("Can't find any Steam directory");
+            }
         }
 
-        return steam_path;
+        Ok(steam_path)
     }
 
     // Parse steam apth to get proton path
@@ -46,14 +58,17 @@ impl Steam {
         proton_path.push_str("root/compatibilitytools.d/");
         if !Path::new(&proton_path).exists() {
             match fs::create_dir_all(&proton_path).is_ok() {
-                true => log::log(&format!(
+                true => log::success(&format!(
                     "compatibilitytools.d directory is create at {}",
                     steam_path
                 )),
-                false => log::error(&format!(
-                    "-> Can't create compatibilitytools.d directory on this directory {}",
-                    steam_path
-                )),
+                false => {
+                    log::error(&format!(
+                        "Can't create compatibilitytools.d directory on this directory {}",
+                        steam_path
+                    ));
+                    log::error("Try to open Steam for create directory");
+                }
             }
         }
 
