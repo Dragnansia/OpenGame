@@ -1,3 +1,4 @@
+mod arch;
 mod fedora;
 pub mod installer;
 
