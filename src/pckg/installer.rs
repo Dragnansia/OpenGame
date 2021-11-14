@@ -4,6 +4,7 @@ use std::process::{exit, Command};
 
 pub trait Installer {
     fn all(&self, root: &String) -> Vec<String>;
+    fn gaming(&self, root: &String) -> Vec<String>;
     fn lutris(&self, root: &String) -> Vec<String>;
     fn heroic_launcher(&self, root: &String) -> Vec<String>;
     fn overlay(&self, root: &String) -> Vec<String>;
