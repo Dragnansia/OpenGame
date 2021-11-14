@@ -16,7 +16,7 @@ use tokio::runtime::Runtime;
 
 use crate::log;
 
-fn basic_hearders() -> HeaderMap<HeaderValue> {
+fn basic_headers() -> HeaderMap<HeaderValue> {
     let mut headers = HeaderMap::new();
     headers.append("User-Agent", HeaderValue::from_str("").unwrap());
     headers
@@ -31,7 +31,7 @@ pub fn get(url: &str) -> Value {
         let u = url_arc.lock().unwrap().to_string();
 
         let client = Client::new();
-        let response = client.get(u).headers(basic_hearders()).send().await;
+        let response = client.get(u).headers(basic_headers()).send().await;
         let data = response.unwrap().text().await.unwrap();
         let js: Value = serde_json::from_str(&data).unwrap();
 
@@ -53,7 +53,7 @@ pub fn download_file(url: &str, path: &str) {
         let v = p.split("/").last().unwrap();
 
         let client = Client::new();
-        let response = client.get(&u).headers(basic_hearders()).send().await.unwrap();
+        let response = client.get(&u).headers(basic_headers()).send().await.unwrap();
         let size = response.content_length().unwrap();
 
         let pb = ProgressBar::new(size);
