@@ -6,6 +6,7 @@ OpenGame (OG) is a gaming dependencies installer for linux distros and ProtonGE 
 <summary>Distributions</summary>
 
 + Fedora
++ Arch (need test)
 </details>
 
 <details>
