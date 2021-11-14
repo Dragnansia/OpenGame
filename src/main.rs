@@ -64,6 +64,13 @@ fn matches_argument() -> ArgMatches<'static> {
             SubCommand::with_name("gaming")
                 .about("Install gaming dependencies, install all dependencies if no FLAGS is add")
                 .arg(
+                    Arg::with_name("gaming")
+                        .short("g")
+                        .long("gaming")
+                        .help("Install gaming dependencies")
+                        .takes_value(false),
+                )
+                .arg(
                     Arg::with_name("lutris")
                         .short("l")
                         .long("lutris")
@@ -98,9 +105,9 @@ fn matches_argument() -> ArgMatches<'static> {
 fn main() {
     let matches = matches_argument();
 
-    match Steam::new() {
-        Ok(steam) => {
-            if let Some(matches) = matches.subcommand_matches("proton") {
+    if let Some(matches) = matches.subcommand_matches("proton") {
+        match Steam::new() {
+            Ok(steam) => {
                 if matches.is_present("install") {
                     proton::install_version(matches.value_of("install").unwrap(), &steam);
                 }
@@ -125,8 +132,8 @@ fn main() {
                     proton::remove_cache();
                 }
             }
+            Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
         }
-        Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
     }
 
     if let Some(matches) = matches.subcommand_matches("gaming") {
@@ -136,6 +143,10 @@ fn main() {
         if matches.args.len() == 0 {
             run_commands(&commands.all(&root));
         } else {
+            if matches.is_present("gaming") {
+                run_commands(&commands.gaming(&root));
+            }
+
             if matches.is_present("lutris") {
                 run_commands(&commands.lutris(&root));
             }

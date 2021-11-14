@@ -40,16 +40,10 @@ impl Steam {
         steam_path.push_str("/.steam/");
 
         if !Path::new(&steam_path).exists() {
-            steam_path = home_dir;
-            // TODO: find the path for flatpak steam
-            steam_path.push_str("/flatpak");
-
-            if !Path::new(&steam_path).exists() {
-                return Err("Can't find any Steam directory");
-            }
+            Err("Can't find any Steam directory")
+        } else {
+            Ok(steam_path)
         }
-
-        Ok(steam_path)
     }
 
     // Parse steam apth to get proton path
@@ -72,7 +66,7 @@ impl Steam {
             }
         }
 
-        return proton_path.to_string();
+        proton_path.to_string()
     }
 
     fn all_proton_version(proton_path: &String) -> std::io::Result<Vec<String>> {
