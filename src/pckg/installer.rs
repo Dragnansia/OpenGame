@@ -2,7 +2,8 @@ use crate::{
     log,
     pckg::{arch::Arch, fedora::Fedora},
 };
-use std::process::{exit, Command};
+use std::io::{Error, ErrorKind};
+use std::process::Command;
 
 pub trait Installer {
     fn all(&self, root: &String) -> Vec<String>;
@@ -33,29 +34,23 @@ pub fn root_command() -> String {
     rt
 }
 
-pub fn find_installer() -> Box<dyn Installer> {
+pub fn find_installer() -> Result<Box<dyn Installer>, Error> {
     let res = Command::new("lsb_release").arg("-is").output();
-    let mut installer: Option<Box<dyn Installer>> = None;
 
-    match res {
+    let installer: Result<Box<dyn Installer>, Error> = match res {
         Ok(r) => {
             let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
             let distro_name = &distro_utf8[..distro_utf8.len() - 1];
             log::success(format!("Current distro is {}", distro_name));
 
-            installer = match distro_name {
-                "Fedora" => Some(Box::new(Fedora {})),
-                "Arch" => Some(Box::new(Arch {})),
-                _ => None,
+            match distro_name {
+                "Fedora" => Ok(Box::new(Fedora {})),
+                "Arch" => Ok(Box::new(Arch {})),
+                _ => Err(Error::new(ErrorKind::Other, "Can't find distro package")),
             }
         }
-        Err(e) => log::error(&e.to_string()),
-    }
+        Err(e) => Err(e),
+    };
 
-    if installer.is_none() {
-        log::error("Can't find a gaming dependencies for this distro");
-        exit(-1);
-    }
-
-    installer.unwrap()
+    installer
 }

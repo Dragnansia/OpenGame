@@ -139,30 +139,33 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("gaming") {
         let root = installer::root_command();
-        let commands = installer::find_installer();
+        match installer::find_installer() {
+            Ok(commands) => {
+                if matches.args.len() == 0 {
+                    run_commands(&commands.all(&root));
+                } else {
+                    if matches.is_present("gaming") {
+                        run_commands(&commands.gaming(&root));
+                    }
 
-        if matches.args.len() == 0 {
-            run_commands(&commands.all(&root));
-        } else {
-            if matches.is_present("gaming") {
-                run_commands(&commands.gaming(&root));
-            }
+                    if matches.is_present("lutris") {
+                        run_commands(&commands.lutris(&root));
+                    }
 
-            if matches.is_present("lutris") {
-                run_commands(&commands.lutris(&root));
-            }
+                    if matches.is_present("heroic") {
+                        run_commands(&commands.heroic_launcher(&root));
+                    }
 
-            if matches.is_present("heroic") {
-                run_commands(&commands.heroic_launcher(&root));
-            }
+                    if matches.is_present("overlay") {
+                        run_commands(&commands.overlay(&root));
+                    }
 
-            if matches.is_present("overlay") {
-                run_commands(&commands.overlay(&root));
+                    if matches.is_present("replay-sorcery") {
+                        run_commands(&commands.replay_sorcery(&root));
+                    }
+                }
             }
-
-            if matches.is_present("replay-sorcery") {
-                run_commands(&commands.replay_sorcery(&root));
-            }
+            Err(err) => log::error(err.to_string()),
         }
     }
 }

@@ -12,11 +12,27 @@ impl Installer for Fedora {
 
         match res {
             Ok(r) => {
-                fedora_version = String::from_utf8(r.stdout)
-                    .unwrap_or_default()
-                    .parse::<i32>()
-                    .unwrap();
-                log::success(&format!("Fedora version {}", &fedora_version));
+                let mut fv = match String::from_utf8(r.stdout) {
+                    Ok(sfutf8) => sfutf8,
+                    Err(err) => {
+                        log::error(err.to_string());
+                        "".to_string()
+                    }
+                };
+
+                // Need to remove \n at the end
+                fv.pop();
+
+                fedora_version = match fv.parse::<i32>() {
+                    Ok(version) => {
+                        log::success(format!("Fedora version is {}", version));
+                        version
+                    }
+                    Err(err) => {
+                        log::error(err.to_string());
+                        0
+                    }
+                }
             }
             Err(_e) => log::error("Can't get fedora version with lsb_release command"),
         }
