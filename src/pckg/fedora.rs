@@ -88,7 +88,10 @@ impl Installer for Fedora {
     }
 
     fn replay_sorcery(&self, root: &String) -> Vec<String> {
-        let destination = format!("{}ReplaySorcery", dir::format_tmp_dir("gaming", true));
+        let destination = format!(
+            "{}ReplaySorcery",
+            dir::format_tmp_dir("gaming", true).unwrap_or_default()
+        );
         let build_dir = format!("{}/bin", destination);
 
         [

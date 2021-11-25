@@ -1,8 +1,7 @@
 use crate::log;
 use home::home_dir;
 use nix::unistd::geteuid;
-use std::fs;
-use std::path::Path;
+use std::{fs, io, path::Path};
 
 pub struct Steam {
     pub _path: String,
@@ -46,7 +45,7 @@ impl Steam {
         }
     }
 
-    // Parse steam apth to get proton path
+    // Parse steam path to get proton path
     fn ppath(steam_path: &String) -> String {
         let mut proton_path = steam_path.clone();
         proton_path.push_str("root/compatibilitytools.d/");
@@ -69,7 +68,7 @@ impl Steam {
         proton_path.to_string()
     }
 
-    fn all_proton_version(proton_path: &String) -> std::io::Result<Vec<String>> {
+    fn all_proton_version(proton_path: &String) -> io::Result<Vec<String>> {
         let mut array: Vec<String> = Vec::new();
         for pe in fs::read_dir(proton_path)? {
             let pe = pe?;

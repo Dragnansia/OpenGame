@@ -17,7 +17,7 @@ pub fn run_commands(cmds: &Vec<String>) {
                 if s.success() {
                     log::success("No error on last command");
                 } else {
-                    log::error(&format!("Command error: {}", s.code().unwrap()));
+                    log::error(&format!("Command error code: {}", s.code().unwrap()));
                 }
             }
             Err(_e) => log::error(&_e.to_string()),

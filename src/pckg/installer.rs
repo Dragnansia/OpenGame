@@ -1,5 +1,7 @@
-use super::fedora::Fedora;
-use crate::log;
+use crate::{
+    log,
+    pckg::{arch::Arch, fedora::Fedora},
+};
 use std::process::{exit, Command};
 
 pub trait Installer {
@@ -21,7 +23,7 @@ pub fn root_command() -> String {
         match res {
             Ok(_r) => {
                 rt = root.to_string();
-                log::success(&format!("root command is {}", root));
+                log::success(format!("root command is {}", root));
                 break;
             }
             Err(_e) => {}
@@ -39,10 +41,11 @@ pub fn find_installer() -> Box<dyn Installer> {
         Ok(r) => {
             let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
             let distro_name = &distro_utf8[..distro_utf8.len() - 1];
-            log::success(&format!("Current distro is {}", distro_name));
+            log::success(format!("Current distro is {}", distro_name));
 
             installer = match distro_name {
                 "Fedora" => Some(Box::new(Fedora {})),
+                "Arch" => Some(Box::new(Arch {})),
                 _ => None,
             }
         }

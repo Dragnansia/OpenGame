@@ -8,23 +8,26 @@ use tar::Archive;
 
 const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";
 
-pub fn remove_cache() {
-    let p = dir::format_tmp_dir("proton", false);
+pub fn remove_cache() -> Option<()> {
+    let po = dir::format_tmp_dir("proton", false);
+    let p = po?;
     let path = Path::new(&p);
 
     if path.exists() {
         let res = fs::remove_dir_all(path);
 
-        if res.is_ok() {
-            let _ = fs::create_dir_all(&path);
-            log::success("Cache folder for ProtonGE is removed");
-        } else if res.is_err() {
-            log::error(&format!(
-                "Can't remove cache folder: {}",
-                res.err().unwrap()
-            ));
+        match res {
+            Ok(_r) => {
+                let _ = fs::create_dir_all(&path);
+                log::success("Cache folder for ProtonGE is removed");
+            }
+            Err(err) => {
+                log::error(&format!("Can't remove cache folder: {}", err));
+            }
         }
     }
+
+    Some(())
 }
 
 pub fn install_version(_version_name: &str, _steam: &Steam) {
@@ -54,12 +57,12 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     log::success(&format!("Installation of {} is finish", path));
 }
 
-fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
+fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) -> Option<()> {
     for a in assets {
         let name = a["name"].as_str().unwrap();
         if name.ends_with(".tar.gz") {
             let path = dir::format_tmp_dir("proton", true);
-            let final_path = format!("{}{}", path, name);
+            let final_path = format!("{}{}", path?, name);
 
             let url = a["browser_download_url"].as_str().unwrap();
             net::download_file(url, &final_path);
@@ -68,6 +71,8 @@ fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) {
             break;
         }
     }
+
+    Some(())
 }
 
 pub fn update_protonge(_steam: &Steam) {
@@ -75,12 +80,14 @@ pub fn update_protonge(_steam: &Steam) {
     let last_release = &res.as_array().unwrap()[0];
 
     let name_release = last_release["tag_name"].as_str().unwrap();
-    if !_steam.is_installed(&format!("Proton-{}", name_release)) {
-        let assets = last_release["assets"].as_array().unwrap();
-        download_and_install_proton(assets, _steam);
-        log::success(&format!("Installation of {} is finish", name_release));
-    } else {
-        log::warning("The latest ProtonGE version is already install");
+
+    match _steam.is_installed(&format!("Proton-{}", name_release)) {
+        true => log::warning("The latest ProtonGE version is already install"),
+        false => {
+            let assets = last_release["assets"].as_array().unwrap();
+            download_and_install_proton(assets, _steam);
+            log::success(&format!("Installation of {} is finish", name_release));
+        }
     }
 }
 
@@ -89,19 +96,24 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
     if _steam.is_installed(&folder_name) {
         let res = fs::remove_dir_all(&format!("{}{}", _steam._proton_path, &folder_name));
 
-        if res.is_err() {
-            log::error(&res.err().unwrap().to_string());
-        } else {
-            log::success(&format!("{} is removed", _version_name));
+        match res {
+            Ok(()) => log::success(format!("{} is removed", _version_name)),
+            Err(err) => log::error(err.to_string()),
         }
     } else {
-        log::warning(&format!("{} is not install", _version_name));
+        log::warning(format!("{} is not install", _version_name));
     }
 }
 
 pub fn list_version(_steam: &Steam) {
-    log::log("Proton version installed:");
-    for pe in &_steam._proton_version {
-        log::log(&format!("- {}", pe));
+    let proton_version = &_steam._proton_version;
+    match proton_version.is_empty() {
+        true => log::warning("No Proton installed"),
+        false => {
+            log::log("Proton version installed:");
+            for pe in proton_version {
+                log::log(&format!("- {}", pe));
+            }
+        }
     }
 }
