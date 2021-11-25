@@ -1,9 +1,10 @@
-use crate::{dir, log};
-use crate::{net, steam::Steam};
+use crate::{dir, log, net, steam::Steam};
 use flate2::read::GzDecoder;
 use serde_json::Value;
-use std::fs::{self, File};
-use std::path::Path;
+use std::{
+    fs::{self, File},
+    path::Path,
+};
 use tar::Archive;
 
 const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";

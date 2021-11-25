@@ -2,8 +2,10 @@ use crate::{
     log,
     pckg::{arch::Arch, fedora::Fedora},
 };
-use std::io::{Error, ErrorKind};
-use std::process::Command;
+use std::{
+    io::{Error, ErrorKind},
+    process::Command,
+};
 
 pub trait Installer {
     fn all(&self, root: &String) -> Vec<String>;

@@ -1,3 +1,4 @@
+use crate::log;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::{
@@ -6,15 +7,14 @@ use reqwest::{
     Client,
 };
 use serde_json::Value;
-use std::fs::File;
-use std::{cmp::min, process::exit};
 use std::{
+    cmp::min,
+    fs::File,
     io::Write,
+    process::exit,
     sync::{mpsc::channel, Arc, Mutex},
 };
 use tokio::runtime::Runtime;
-
-use crate::log;
 
 fn basic_headers() -> HeaderMap<HeaderValue> {
     let mut headers = HeaderMap::new();

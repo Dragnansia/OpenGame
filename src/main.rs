@@ -5,7 +5,6 @@ mod pckg;
 mod proton;
 mod steam;
 
-use crate::log::*;
 use clap::{App, Arg, ArgMatches, SubCommand};
 use pckg::{installer, run_commands};
 use steam::Steam;

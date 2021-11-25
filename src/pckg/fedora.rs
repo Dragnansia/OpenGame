@@ -1,6 +1,4 @@
-use super::installer::Installer;
-use crate::dir;
-use crate::log;
+use crate::{dir, installer::Installer, log};
 use std::process::Command;
 
 pub struct Fedora {}

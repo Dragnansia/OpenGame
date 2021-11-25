@@ -1,7 +1,5 @@
-use super::installer::Installer;
-use crate::dir;
-use crate::log;
-use std::process::{exit, Command};
+use crate::{dir, installer::Installer, log};
+use std::process::Command;
 
 pub struct Arch {}
 
@@ -28,14 +26,14 @@ impl Installer for Arch {
 
         if aur.is_empty() {
             log::error("No Aur package manager found for this arch distro");
-            exit(1);
+            Vec::new()
+        } else {
+            [format!(
+                "{} -S heroic-games-launcher-bin -y --needed --noconfirm",
+                aur
+            )]
+            .to_vec()
         }
-
-        [format!(
-            "{} -S heroic-games-launcher-bin -y --needed --noconfirm",
-            aur
-        )]
-        .to_vec()
     }
 
     fn overlay(&self, _root: &String) -> Vec<String> {
@@ -43,10 +41,10 @@ impl Installer for Arch {
 
         if aur.is_empty() {
             log::error("No Aur package manager found for this arch distro");
-            exit(1);
+            Vec::new()
+        } else {
+            [format!("{} goverlay-bin -y --needed --noconfirm", aur)].to_vec()
         }
-
-        [format!("{} goverlay-bin -y --needed --noconfirm", aur)].to_vec()
     }
 
     fn replay_sorcery(&self, root: &String) -> Vec<String> {
