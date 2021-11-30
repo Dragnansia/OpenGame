@@ -1,6 +1,5 @@
 /// Print a simple log
 #[macro_export]
-#[allow_internal_unstable(print_internals, format_args_nl)]
 macro_rules! log {
     ($($arg:tt)*) => {{
         println!("\x1b[0;37m[Log] {}\x1b[0m", format!($($arg)*))
@@ -10,7 +9,6 @@ pub(crate) use log;
 
 /// Print error message
 #[macro_export]
-#[allow_internal_unstable(print_internals, format_args_nl)]
 macro_rules! error {
     ($($arg:tt)*) => {{
         println!("\x1b[0;31m[Error] {}\x1b[0m", format!($($arg)*))
@@ -20,7 +18,6 @@ pub(crate) use error;
 
 /// Print warning message
 #[macro_export]
-#[allow_internal_unstable(print_internals, format_args_nl)]
 macro_rules! warning {
     ($($arg:tt)*) => {{
         println!("\x1b[0;33m[Warning] {}\x1b[0m", format!($($arg)*))
@@ -30,7 +27,6 @@ pub(crate) use warning;
 
 /// Print a success message
 #[macro_export]
-#[allow_internal_unstable(print_internals, format_args_nl)]
 macro_rules! success {
     ($($arg:tt)*) => {{
         println!("\x1b[0;32m[Success] {}\x1b[0m", format!($($arg)*))
