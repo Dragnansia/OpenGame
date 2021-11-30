@@ -1,3 +1,5 @@
+#![feature(allow_internal_unstable)]
+
 mod dir;
 mod log;
 mod net;
@@ -132,7 +134,7 @@ fn main() {
                     proton::remove_cache();
                 }
             }
-            Err(e) => log::error(&format!("Steam initialisation error: {}", e)),
+            Err(e) => error!("Steam initialisation error: {}", e),
         }
     }
 
@@ -164,7 +166,7 @@ fn main() {
                     }
                 }
             }
-            Err(err) => log::error(err.to_string()),
+            Err(err) => error!("{}", err.to_string()),
         }
     }
 }

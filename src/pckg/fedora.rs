@@ -1,4 +1,4 @@
-use crate::{dir, installer::Installer, log};
+use crate::{dir, installer::Installer, log::*};
 use std::process::Command;
 
 pub struct Fedora {}
@@ -13,7 +13,7 @@ impl Installer for Fedora {
                 let mut fv = match String::from_utf8(r.stdout) {
                     Ok(sfutf8) => sfutf8,
                     Err(err) => {
-                        log::error(err.to_string());
+                        error!("{}", err.to_string());
                         "".to_string()
                     }
                 };
@@ -23,16 +23,16 @@ impl Installer for Fedora {
 
                 fedora_version = match fv.parse::<i32>() {
                     Ok(version) => {
-                        log::success(format!("Fedora version is {}", version));
+                        success!("Fedora version is {}", version);
                         version
                     }
                     Err(err) => {
-                        log::error(err.to_string());
+                        error!("{}", err.to_string());
                         0
                     }
                 }
             }
-            Err(_e) => log::error("Can't get fedora version with lsb_release command"),
+            Err(_e) => error!("Can't get fedora version with lsb_release command"),
         }
 
         if fedora_version < 33 {
@@ -63,9 +63,9 @@ impl Installer for Fedora {
                     .unwrap_or_default()
                     .parse::<i32>()
                     .unwrap();
-                log::success(&format!("Fedora version {}", &fedora_version));
+                success!("Fedora version {}", &fedora_version);
             }
-            Err(_e) => log::error("Can't get fedora version with lsb_release command"),
+            Err(_e) => error!("Can't get fedora version with lsb_release command"),
         }
 
         if fedora_version < 33 {

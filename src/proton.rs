@@ -1,4 +1,4 @@
-use crate::{dir, log, net, steam::Steam};
+use crate::{dir, log::*, net, steam::Steam};
 use flate2::read::GzDecoder;
 use serde_json::Value;
 use std::{
@@ -20,11 +20,9 @@ pub fn remove_cache() -> Option<()> {
         match res {
             Ok(_r) => {
                 let _ = fs::create_dir_all(&path);
-                log::success("Cache folder for ProtonGE is removed");
+                success!("Cache folder for ProtonGE is removed");
             }
-            Err(err) => {
-                log::error(&format!("Can't remove cache folder: {}", err));
-            }
+            Err(err) => error!("Can't remove cache folder: {}", err),
         }
     }
 
@@ -43,7 +41,7 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
             let assets = r["assets"].as_array().unwrap();
             download_and_install_proton(assets, _steam);
 
-            log::success(&format!("Installation of {} is finish", tag_name));
+            success!("Installation of {} is finish", tag_name);
             break;
         }
     }
@@ -53,9 +51,9 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     let tar_gz = File::open(&path).unwrap();
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
-    log::log(&format!("Extract {}", &path));
+    log!("Extract {}", &path);
     let _ = archive.unpack(&_steam._proton_path);
-    log::success(&format!("Installation of {} is finish", path));
+    success!("Installation of {} is finish", path);
 }
 
 fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) -> Option<()> {
@@ -83,11 +81,11 @@ pub fn update_protonge(_steam: &Steam) {
     let name_release = last_release["tag_name"].as_str().unwrap();
 
     match _steam.is_installed(&format!("Proton-{}", name_release)) {
-        true => log::warning("The latest ProtonGE version is already install"),
+        true => warning!("The latest ProtonGE version is already install"),
         false => {
             let assets = last_release["assets"].as_array().unwrap();
             download_and_install_proton(assets, _steam);
-            log::success(&format!("Installation of {} is finish", name_release));
+            success!("Installation of {} is finish", name_release);
         }
     }
 }
@@ -98,22 +96,22 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
         let res = fs::remove_dir_all(&format!("{}{}", _steam._proton_path, &folder_name));
 
         match res {
-            Ok(()) => log::success(format!("{} is removed", _version_name)),
-            Err(err) => log::error(err.to_string()),
+            Ok(()) => success!("{} is removed", _version_name),
+            Err(err) => error!("{}", err.to_string()),
         }
     } else {
-        log::warning(format!("{} is not install", _version_name));
+        warning!("{} is not install", _version_name);
     }
 }
 
 pub fn list_version(_steam: &Steam) {
     let proton_version = &_steam._proton_version;
     match proton_version.is_empty() {
-        true => log::warning("No Proton installed"),
+        true => warning!("No Proton installed"),
         false => {
-            log::log("Proton version installed:");
+            log!("Proton version installed:");
             for pe in proton_version {
-                log::log(&format!("- {}", pe));
+                log!("- {}", pe);
             }
         }
     }

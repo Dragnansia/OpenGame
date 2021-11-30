@@ -2,7 +2,7 @@ mod arch;
 mod fedora;
 pub mod installer;
 
-use crate::log;
+use crate::log::*;
 use std::process::Command;
 
 pub fn run_commands(cmds: &Vec<String>) {
@@ -15,12 +15,12 @@ pub fn run_commands(cmds: &Vec<String>) {
         match res {
             Ok(s) => {
                 if s.success() {
-                    log::success("No error on last command");
+                    success!("No error on last command");
                 } else {
-                    log::error(&format!("Command error code: {}", s.code().unwrap()));
+                    error!("Command error code: {}", s.code().unwrap());
                 }
             }
-            Err(_e) => log::error(&_e.to_string()),
+            Err(_e) => error!("{}", &_e.to_string()),
         }
     }
 }

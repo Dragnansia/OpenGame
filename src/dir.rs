@@ -1,4 +1,4 @@
-use crate::log;
+use crate::log::*;
 use home::home_dir;
 use std::{fs, path::Path};
 
@@ -25,7 +25,7 @@ pub fn temp_dir() -> Result<String, &'static str> {
 
             if !Path::new(&temp_dir).exists() {
                 let _ = fs::create_dir_all(&temp_dir);
-                log::success("Create temp folder");
+                success!("Create temp folder");
             }
 
             Ok(temp_dir)

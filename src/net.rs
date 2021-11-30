@@ -1,4 +1,4 @@
-use crate::log;
+use crate::log::*;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::{
@@ -42,6 +42,7 @@ pub fn get(url: &str) -> Value {
     data
 }
 
+// Todo: Add a Result for return for check if this download is ok
 pub fn download_file(url: &str, path: &str) {
     let rt = Runtime::new().unwrap();
     let url_arc = Arc::new(Mutex::new(url.to_string()));
@@ -59,17 +60,17 @@ pub fn download_file(url: &str, path: &str) {
         let pb = ProgressBar::new(size);
         pb.set_style(ProgressStyle::default_bar()
             .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-            .progress_chars("#>-")); 
+            .progress_chars("#>-"));
         pb.set_message(format!("-> Downloading {}", v));
 
-        let file_create = File::create(&p);
-        if file_create.is_err() {
-            log::error(&format!("Failed to create file: {}", &p));
-            log::error(&file_create.err().unwrap().to_string());
-            exit(-1);
-        }
-
-        let mut file = file_create.unwrap();
+        let mut file = match File::create(&p) {
+            Ok(fc) => fc,
+            Err(err) => {
+                error!("Failed to create file: {}", &p);
+                error!("{}", err.to_string());
+                exit(-1);
+            }
+        };
         let mut downloaded: u64 = 0;
         let mut stream = response.bytes_stream();
 

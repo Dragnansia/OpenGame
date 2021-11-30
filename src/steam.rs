@@ -1,4 +1,4 @@
-use crate::log;
+use crate::log::*;
 use home::home_dir;
 use nix::unistd::geteuid;
 use std::{fs, io, path::Path};
@@ -11,11 +11,9 @@ pub struct Steam {
 
 impl Steam {
     pub fn new() -> Result<Self, &'static str> {
-        if geteuid().is_root() {
-            Err("root privileged detected")
-        } else {
-            let steam_path = Steam::fpath();
-            let statue = match steam_path {
+        match geteuid().is_root() {
+            true => Err("root privileged detected"),
+            false => match Steam::fpath() {
                 Ok(st_path) => {
                     let proton_path = Steam::ppath(&st_path);
                     Ok(Self {
@@ -26,9 +24,7 @@ impl Steam {
                     })
                 }
                 Err(err) => Err(err),
-            };
-
-            statue
+            },
         }
     }
 
@@ -38,10 +34,9 @@ impl Steam {
         let mut steam_path = home_dir.clone();
         steam_path.push_str("/.steam/");
 
-        if !Path::new(&steam_path).exists() {
-            Err("Can't find any Steam directory")
-        } else {
-            Ok(steam_path)
+        match Path::new(&steam_path).exists() {
+            true => Ok(steam_path),
+            false => Err("Can't find any Steam directory"),
         }
     }
 
@@ -51,16 +46,13 @@ impl Steam {
         proton_path.push_str("root/compatibilitytools.d/");
         if !Path::new(&proton_path).exists() {
             match fs::create_dir_all(&proton_path).is_ok() {
-                true => log::success(&format!(
-                    "compatibilitytools.d directory is create at {}",
-                    steam_path
-                )),
+                true => success!("compatibilitytools.d directory is create at {}", steam_path),
                 false => {
-                    log::error(&format!(
+                    error!(
                         "Can't create compatibilitytools.d directory on this directory {}",
                         steam_path
-                    ));
-                    log::error("Try to open Steam for create directory");
+                    );
+                    error!("Try to open Steam for create directory");
                 }
             }
         }

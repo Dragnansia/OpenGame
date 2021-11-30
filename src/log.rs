@@ -1,25 +1,50 @@
-use colored::*;
-
-/// TODO: Find a better way for log somthing like println
-/// macro and no just a call of this for removr AsRef<str>
-/// and format
-
 /// Print a simple log
-pub fn log<T: AsRef<str>>(message: T) {
-    println!("{} {}", "[Log]".white(), message.as_ref().white());
+#[macro_export]
+#[allow_internal_unstable(print_internals, format_args_nl)]
+macro_rules! log {
+    ($($arg:tt)*) => {{
+        println!("\x1b[0;37m[Log] {}\x1b[0m", format!($($arg)*))
+    }}
 }
+pub(crate) use log;
 
 /// Print error message
-pub fn error<T: AsRef<str>>(message: T) {
-    println!("{} {}", "[Error]".red(), message.as_ref().red());
+#[macro_export]
+#[allow_internal_unstable(print_internals, format_args_nl)]
+macro_rules! error {
+    ($($arg:tt)*) => {{
+        println!("\x1b[0;31m[Error] {}\x1b[0m", format!($($arg)*))
+    }}
 }
+pub(crate) use error;
 
 /// Print warning message
-pub fn warning<T: AsRef<str>>(message: T) {
-    println!("{} {}", "[Warning]".yellow(), message.as_ref().yellow());
+#[macro_export]
+#[allow_internal_unstable(print_internals, format_args_nl)]
+macro_rules! warning {
+    ($($arg:tt)*) => {{
+        println!("\x1b[0;33m[Warning] {}\x1b[0m", format!($($arg)*))
+    }}
 }
+pub(crate) use warning;
 
 /// Print a success message
-pub fn success<T: AsRef<str>>(message: T) {
-    println!("{} {}", "[Success]".green(), message.as_ref().green());
+#[macro_export]
+#[allow_internal_unstable(print_internals, format_args_nl)]
+macro_rules! success {
+    ($($arg:tt)*) => {{
+        println!("\x1b[0;32m[Success] {}\x1b[0m", format!($($arg)*))
+    }}
+}
+pub(crate) use success;
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn log() {
+        success!("I'm a success");
+        log!("I'm a log");
+        warning!("I'm a warning");
+        error!("I'm a error");
+    }
 }

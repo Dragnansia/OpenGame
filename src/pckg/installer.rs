@@ -1,5 +1,5 @@
 use crate::{
-    log,
+    log::*,
     pckg::{arch::Arch, fedora::Fedora},
 };
 use std::{
@@ -26,7 +26,7 @@ pub fn root_command() -> String {
         match res {
             Ok(_r) => {
                 rt = root.to_string();
-                log::success(format!("root command is {}", root));
+                success!("root command is {}", root);
                 break;
             }
             Err(_e) => {}
@@ -43,7 +43,7 @@ pub fn find_installer() -> Result<Box<dyn Installer>, Error> {
         Ok(r) => {
             let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
             let distro_name = &distro_utf8[..distro_utf8.len() - 1];
-            log::success(format!("Current distro is {}", distro_name));
+            success!("Current distro is {}", distro_name);
 
             match distro_name {
                 "Fedora" => Ok(Box::new(Fedora {})),

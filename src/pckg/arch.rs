@@ -1,4 +1,4 @@
-use crate::{dir, installer::Installer, log};
+use crate::{dir, installer::Installer, log::*};
 use std::process::Command;
 
 pub struct Arch {}
@@ -25,7 +25,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            log::error("No Aur package manager found for this arch distro");
+            error!("No Aur package manager found for this arch distro");
             Vec::new()
         } else {
             [format!(
@@ -40,7 +40,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            log::error("No Aur package manager found for this arch distro");
+            error!("No Aur package manager found for this arch distro");
             Vec::new()
         } else {
             [format!("{} goverlay-bin -y --needed --noconfirm", aur)].to_vec()
@@ -77,7 +77,7 @@ fn get_aur_package_manager() -> String {
         match res {
             Ok(_r) => {
                 aur = aurl.to_string();
-                log::success(&format!("Aur package Manager command is {}", aurl));
+                success!("Aur package Manager command is {}", aurl);
                 break;
             }
             Err(_e) => {}
