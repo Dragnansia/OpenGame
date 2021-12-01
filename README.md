@@ -7,6 +7,8 @@ OpenGame (OG) is a gaming dependencies and ProtonGE (like protonup) installer fo
 
 + Fedora
 + Arch (need test)
++ Ubuntu (need test)
++ ElementaryOS (need test)
 </details>
 
 <details>
@@ -21,7 +23,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 <summary>Installation</summary>
 
 ```shell
-# create a file to install latest version of this project
+curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | bash
 ```
 </details>
 
