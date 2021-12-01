@@ -1,4 +1,10 @@
-/// Print a simple log
+/// Print a simple white message
+///
+/// # Examples
+/// ```
+/// log!("hello there!");
+/// log!("format {} arguments", "some");
+/// ```
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {{
@@ -7,7 +13,13 @@ macro_rules! log {
 }
 pub(crate) use log;
 
-/// Print error message
+/// Print a simple red message
+///
+/// # Examples
+/// ```
+/// error!("hello there!");
+/// error!("format {} arguments", "some");
+/// ```
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {{
@@ -16,7 +28,13 @@ macro_rules! error {
 }
 pub(crate) use error;
 
-/// Print warning message
+/// Print a simple yellow message
+///
+/// # Examples
+/// ```
+/// warning!("hello there!");
+/// warning!("format {} arguments", "some");
+/// ```
 #[macro_export]
 macro_rules! warning {
     ($($arg:tt)*) => {{
@@ -25,7 +43,13 @@ macro_rules! warning {
 }
 pub(crate) use warning;
 
-/// Print a success message
+/// Print a simple green message
+///
+/// # Examples
+/// ```
+/// success!("hello there!");
+/// success!("format {} arguments", "some");
+/// ```
 #[macro_export]
 macro_rules! success {
     ($($arg:tt)*) => {{
@@ -38,8 +62,8 @@ pub(crate) use success;
 mod tests {
     #[test]
     fn log() {
-        success!("I'm a success");
         log!("I'm a log");
+        success!("I'm a success");
         warning!("I'm a warning");
         error!("I'm a error");
     }
