@@ -1,9 +1,9 @@
-use crate::{dir, installer::Installer, log::*};
+use crate::{installer::Installer, log::*};
 use std::process::Command;
 
 pub struct Arch {}
 
-// TODO: Verif if this arch gestion work properly
+// TODO: Need a verification on a arch distribution
 impl Installer for Arch {
     fn all(&self, root: &String) -> Vec<String> {
         [
@@ -18,7 +18,7 @@ impl Installer for Arch {
     }
 
     fn lutris(&self, root: &String) -> Vec<String> {
-        [format!("{} pacman -S lutris", root)].to_vec()
+        [format!("{} pacman -Syu lutris", root)].to_vec()
     }
 
     fn heroic_launcher(&self, _root: &String) -> Vec<String> {
@@ -39,50 +39,44 @@ impl Installer for Arch {
     fn overlay(&self, _root: &String) -> Vec<String> {
         let aur = get_aur_package_manager();
 
-        if aur.is_empty() {
-            error!("No Aur package manager found for this arch distro");
-            Vec::new()
-        } else {
-            [format!("{} goverlay-bin -y --needed --noconfirm", aur)].to_vec()
+        match aur.is_empty() {
+            true => {
+                error!("No Aur package manager found for this arch distro");
+                Vec::new()
+            }
+            false => [format!("{} goverlay-bin -y --needed --noconfirm", aur)].to_vec(),
         }
     }
 
-    fn replay_sorcery(&self, root: &String) -> Vec<String> {
-        let destination = format!(
-            "{}ReplaySorcery",
-            dir::format_tmp_dir("gaming", true).unwrap_or_default()
-        );
-        let build_dir = format!("{}/bin", destination);
+    fn replay_sorcery(&self, _root: &String) -> Vec<String> {
+        let aur = get_aur_package_manager();
 
-        [
-            format!("{} dnf install cmake ffmpeg-devel ffmpeg-libs ffmpeg libdrm libX11-devel libX11-xcb libX11", root),
-            format!("git clone --recursive -j4 https://github.com/matanui159/ReplaySorcery.git {}", destination),
-            format!("cmake -B {} -S {} -DCMAKE_BUILD_TYPE=Release", build_dir, destination),
-            // Verif if this command is run correctly
-            format!("make -C {}", build_dir),
-            format!("{} make -C {} install", root, build_dir),
-            "systemctl --user enable --now replay-sorcery".to_string(),
-            format!("{} systemctl enable --now replay-sorcery-kms", root)
-        ].to_vec()
+        match aur.is_empty() {
+            true => {
+                error!("No Aur package manager found for this arch distro");
+                Vec::new()
+            }
+            false => [format!("{} replay-sorcery -y --needed --noconfirm", aur)].to_vec(),
+        }
+    }
+
+    fn mini_galaxy(&self, _root: &String) -> Vec<String> {
+        let aur = get_aur_package_manager();
+
+        match aur.is_empty() {
+            true => {
+                error!("No Aur package manager found for this arch distro");
+                Vec::new()
+            }
+            false => [format!("{} minigalaxy -y --needed --noconfirm", aur)].to_vec(),
+        }
     }
 }
 
 fn get_aur_package_manager() -> String {
-    let aur_list = ["yay", "pamac", "paru"];
-    let mut aur = String::new();
-
-    for aurl in aur_list {
-        let res = Command::new("command").arg("-v").arg(aurl).output();
-
-        match res {
-            Ok(_r) => {
-                aur = aurl.to_string();
-                success!("Aur package Manager command is {}", aurl);
-                break;
-            }
-            Err(_e) => {}
-        }
-    }
-
-    aur
+    ["yay", "pamac", "paru"]
+        .iter()
+        .find(|el| Command::new("command").arg("-v").arg(el).output().is_ok())
+        .unwrap_or_else(|| &"")
+        .to_string()
 }
