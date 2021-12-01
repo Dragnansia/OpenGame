@@ -28,6 +28,14 @@ curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | 
 </details>
 
 <details>
+<summary>Remove</summary>
+
+```shell
+rm ~/bin/opengame
+```
+</details>
+
+<details>
 <summary>Other projects</summary>
 
 + [LibreGaming](https://github.com/Ahmed-Al-Balochi/LibreGaming)
