@@ -5,35 +5,7 @@ pub struct Fedora {}
 
 impl Installer for Fedora {
     fn all(&self, root: &String) -> Vec<String> {
-        let res = Command::new("lsb_release").arg("-rs").output();
-        let mut fedora_version = 0;
-
-        match res {
-            Ok(r) => {
-                let mut fv = match String::from_utf8(r.stdout) {
-                    Ok(sfutf8) => sfutf8,
-                    Err(err) => {
-                        error!("{}", err.to_string());
-                        "".to_string()
-                    }
-                };
-
-                // Need to remove \n at the end
-                fv.pop();
-
-                fedora_version = match fv.parse::<i32>() {
-                    Ok(version) => {
-                        success!("Fedora version is {}", version);
-                        version
-                    }
-                    Err(err) => {
-                        error!("{}", err.to_string());
-                        0
-                    }
-                }
-            }
-            Err(_e) => error!("Can't get fedora version with lsb_release command"),
-        }
+        let fedora_version = find_version();
 
         if fedora_version < 33 {
             [
@@ -54,19 +26,7 @@ impl Installer for Fedora {
     }
 
     fn gaming(&self, root: &String) -> Vec<String> {
-        let res = Command::new("lsb_release").arg("-rs").output();
-        let mut fedora_version = 0;
-
-        match res {
-            Ok(r) => {
-                fedora_version = String::from_utf8(r.stdout)
-                    .unwrap_or_default()
-                    .parse::<i32>()
-                    .unwrap();
-                success!("Fedora version {}", &fedora_version);
-            }
-            Err(_e) => error!("Can't get fedora version with lsb_release command"),
-        }
+        let fedora_version = find_version();
 
         if fedora_version < 33 {
             [
@@ -118,4 +78,22 @@ impl Installer for Fedora {
             format!("{} systemctl enable --now replay-sorcery-kms", root)
         ].to_vec()
     }
+
+    fn mini_galaxy(&self, root: &String) -> Vec<String> {
+        [format!("{} dnf install minigalaxy", root)].to_vec()
+    }
+}
+
+fn find_version() -> i32 {
+    let res = match Command::new("lsb_release").arg("-rs").output() {
+        Ok(r) => String::from_utf8(r.stdout).unwrap_or_default(),
+        Err(err) => {
+            error!("{:?}", err);
+            "".to_string()
+        }
+    };
+
+    let r = &res[..res.len() - 1];
+    success!("Fedora version is {}", r);
+    r.parse::<i32>().unwrap_or_default()
 }
