@@ -1,6 +1,7 @@
 mod arch;
 mod fedora;
 pub mod installer;
+mod ubuntu;
 
 use crate::log::*;
 use std::process::Command;

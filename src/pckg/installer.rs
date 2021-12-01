@@ -1,6 +1,6 @@
 use crate::{
     log::*,
-    pckg::{arch::Arch, fedora::Fedora},
+    pckg::{arch::Arch, fedora::Fedora, ubuntu::Ubuntu},
 };
 use std::{
     io::{Error, ErrorKind},
@@ -37,6 +37,7 @@ pub fn find_installer() -> Result<Box<dyn Installer>, Error> {
             match distro_name {
                 "Fedora" => Ok(Box::new(Fedora {})),
                 "Arch" => Ok(Box::new(Arch {})),
+                "Ubuntu" | "Elementary" => Ok(Box::new(Ubuntu {})),
                 _ => Err(Error::new(ErrorKind::Other, "Can't find distro package")),
             }
         }
