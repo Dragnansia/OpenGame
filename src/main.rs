@@ -99,6 +99,13 @@ fn matches_argument() -> ArgMatches<'static> {
                         .long("replay-sorcery")
                         .help("Install ReplaySorcery")
                         .takes_value(false),
+                )
+                .arg(
+                    Arg::with_name("minigalaxy")
+                        .short("m")
+                        .long("minigalaxy")
+                        .help("Install MiniGalaxy")
+                        .takes_value(false),
                 ),
         )
         .get_matches()
@@ -163,6 +170,10 @@ fn main() {
 
                     if matches.is_present("replay-sorcery") {
                         run_commands(&commands.replay_sorcery(&root));
+                    }
+
+                    if matches.is_present("minigalaxy") {
+                        run_commands(&commands.mini_galaxy(&root));
                     }
                 }
             }
