@@ -23,7 +23,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 <summary>Installation</summary>
 
 ```shell
-curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | bash
+curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | sh
 ```
 </details>
 
