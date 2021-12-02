@@ -4,5 +4,10 @@ curl -o opengame -LJO "$(curl -s https://api.github.com/repos/Dragnansia/OpenGam
 echo -e "\x1b[0;32m[Info] Add execution mode to opengame\x1b[0m"
 chmod +x opengame
 
+if [ ! -d "~/bin" ]; then
+    echo -e "\x1b[0;32m[Info] Create ~/bin directory"
+    mkdir ~/bin
+fi
+
 echo -e "\x1b[0;32m[Info] Move opengame to ~/bin\x1b[0m"
 mv opengame ~/bin
