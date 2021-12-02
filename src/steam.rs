@@ -1,5 +1,4 @@
 use crate::{dir, log::*};
-use nix::unistd::geteuid;
 use std::{fs, io, path::Path};
 
 pub struct Steam {
@@ -10,20 +9,16 @@ pub struct Steam {
 
 impl Steam {
     pub fn new() -> Result<Self, &'static str> {
-        match geteuid().is_root() {
-            true => Err("root privileged detected"),
-            false => match Steam::fpath() {
-                Ok(st_path) => {
-                    let proton_path = Steam::ppath(&st_path);
-                    Ok(Self {
-                        _path: st_path.clone(),
-                        _proton_path: proton_path.clone(),
-                        _proton_version: Steam::all_proton_version(&proton_path)
-                            .unwrap_or_default(),
-                    })
-                }
-                Err(err) => Err(err),
-            },
+        match Steam::fpath() {
+            Ok(st_path) => {
+                let proton_path = Steam::ppath(&st_path);
+                Ok(Self {
+                    _path: st_path.clone(),
+                    _proton_path: proton_path.clone(),
+                    _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+                })
+            }
+            Err(err) => Err(err),
         }
     }
 
