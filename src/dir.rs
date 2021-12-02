@@ -1,5 +1,4 @@
 use crate::log::*;
-use home::home_dir;
 use std::{fs, path::Path};
 
 const TMP_DIR: &str = "/.cache/opengame/";
@@ -35,8 +34,8 @@ pub fn temp_dir() -> Result<String, &'static str> {
 }
 
 pub fn user_dir() -> Result<String, &'static str> {
-    match home_dir() {
-        Some(hd) => Ok(hd.as_path().to_str().unwrap_or_default().to_string()),
-        None => Err("Can't find home directory"),
+    match std::env::var("HOME") {
+        Ok(hd) => Ok(hd),
+        Err(_err) => Err("Can't find home directory"),
     }
 }

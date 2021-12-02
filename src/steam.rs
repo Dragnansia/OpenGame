@@ -1,5 +1,4 @@
-use crate::log::*;
-use home::home_dir;
+use crate::{dir, log::*};
 use nix::unistd::geteuid;
 use std::{fs, io, path::Path};
 
@@ -30,9 +29,7 @@ impl Steam {
 
     // find steam path
     fn fpath() -> Result<String, &'static str> {
-        let home_dir = home_dir().unwrap_or_default().display().to_string();
-        let mut steam_path = home_dir.clone();
-        steam_path.push_str("/.steam/");
+        let steam_path = format!("{}{}", dir::user_dir()?, "/.steam/");
 
         match Path::new(&steam_path).exists() {
             true => Ok(steam_path),
