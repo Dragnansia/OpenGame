@@ -7,8 +7,8 @@ OpenGame (OG) is a gaming dependencies and ProtonGE (like protonup) installer fo
 
 + Fedora
 + Arch (need test)
-+ Ubuntu (need test)
-+ ElementaryOS (need test)
++ Ubuntu
++ ElementaryOS
 </details>
 
 <details>
