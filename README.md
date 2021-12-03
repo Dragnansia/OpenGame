@@ -13,6 +13,7 @@ OpenGame (OG) is a gaming dependencies and ProtonGE (like protonup) installer fo
 
 <details>
 <summary>Dependencies</summary>
+Install curl on your system to use installation command
 
 ```shell
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -21,6 +22,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 <details>
 <summary>Installation</summary>
+Install curl on your system to use installation command
 
 ```shell
 curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | sh
