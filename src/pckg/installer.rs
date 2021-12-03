@@ -20,7 +20,7 @@ pub trait Installer {
 pub fn root_command() -> String {
     let res = ["sudo", "doas", "su"]
         .iter()
-        .find(|el| Command::new("command").arg("-v").arg(el).output().is_ok())
+        .find(|el| Command::new(el).output().is_ok())
         .unwrap_or_else(|| &"")
         .to_string();
     success!("Root command is {}", res);
