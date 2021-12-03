@@ -1,4 +1,4 @@
-use crate::{dir, error, installer::Installer};
+use crate::{dir, installer::Installer, log::*, net::get};
 use std::process::Command;
 
 pub struct Ubuntu {}
@@ -53,9 +53,9 @@ impl Installer for Ubuntu {
         [
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
-            format!("{} add-apt-repository ppa:lutris-team/lutris -y", root),
+            format!("{} add-apt-repository -y ppa:lutris-team/lutris", root),
             format!("{} apt update", root),
-            format!("{} apt install -y lutris ", root),
+            format!("{} apt install -y lutris", root),
         ]
         .to_vec()
     }
@@ -114,12 +114,32 @@ impl Installer for Ubuntu {
     }
 
     fn mini_galaxy(&self, root: &String) -> Vec<String> {
-        [
-            "curl -o minigalaxy.deb -LJO $(curl -s https://api.github.com/repos/sharkwouter/minigalaxy/releases | grep browser_download_url | grep '[.]deb' | head -n 1 | cut -d '\"' -f 4)".to_string(),
-            format!("{} apt install minigalaxy.deb", root),
-            format!("{} rm -rf minigalaxy.deb", root)
-        ].to_vec()
+        match dir::user_dir() {
+            Ok(dir) => [
+                format!(
+                    "curl -o {}/minigalaxy.deb -LJO {}",
+                    dir,
+                    find_mini_galaxy_last_release()
+                ),
+                format!("{} apt install {}/minigalaxy.deb", root, dir),
+                format!("{} rm -f {}/minigalaxy.deb", root, dir),
+            ]
+            .to_vec(),
+            Err(err) => {
+                error!("{}", err);
+                Vec::new()
+            }
+        }
     }
+}
+
+// Todo: find a better way to return the result
+fn find_mini_galaxy_last_release() -> String {
+    let res = get("https://api.github.com/repos/sharkwouter/minigalaxy/releases");
+    let arr = res.as_array().unwrap();
+    let assets = &arr[0]["assets"].as_array().unwrap()[0];
+    let url = assets["browser_download_url"].as_str().unwrap_or_default();
+    String::from(url)
 }
 
 fn release_code_name() -> String {
