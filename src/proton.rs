@@ -52,7 +52,7 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
     log!("Extract {}", &path);
-    let _ = archive.unpack(&_steam._proton_path);
+    let _ = archive.unpack(&_steam.proton_path);
     success!("Installation of {} is finish", path);
 }
 
@@ -93,7 +93,7 @@ pub fn update_protonge(_steam: &Steam) {
 pub fn remove_version(_version_name: &str, _steam: &Steam) {
     let folder_name = format!("Proton-{}", _version_name).to_string();
     if _steam.is_installed(&folder_name) {
-        let res = fs::remove_dir_all(&format!("{}{}", _steam._proton_path, &folder_name));
+        let res = fs::remove_dir_all(&format!("{}{}", _steam.proton_path, &folder_name));
 
         match res {
             Ok(()) => success!("{} is removed", _version_name),
@@ -105,7 +105,7 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
 }
 
 pub fn list_version(_steam: &Steam) {
-    let proton_version = &_steam._proton_version;
+    let proton_version = &_steam.proton_version;
     match proton_version.is_empty() {
         true => warning!("No Proton installed"),
         false => {

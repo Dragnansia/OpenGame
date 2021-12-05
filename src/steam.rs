@@ -2,9 +2,9 @@ use crate::{dir, log::*};
 use std::{fs, io, path::Path};
 
 pub struct Steam {
-    pub _path: String,
-    pub _proton_path: String,
-    pub _proton_version: Vec<String>,
+    pub path: String,
+    pub proton_path: String,
+    pub proton_version: Vec<String>,
 }
 
 impl Steam {
@@ -13,9 +13,9 @@ impl Steam {
             Ok(st_path) => {
                 let proton_path = Steam::ppath(&st_path);
                 Ok(Self {
-                    _path: st_path.clone(),
-                    _proton_path: proton_path.clone(),
-                    _proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+                    path: st_path.clone(),
+                    proton_path: proton_path.clone(),
+                    proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
                 })
             }
             Err(err) => Err(err),
@@ -72,6 +72,6 @@ impl Steam {
     }
 
     pub fn is_installed(&self, version: &String) -> bool {
-        self._proton_version.contains(version)
+        self.proton_version.contains(version)
     }
 }
