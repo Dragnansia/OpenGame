@@ -6,6 +6,16 @@ mod ubuntu;
 use crate::log::*;
 use std::process::Command;
 
+/// Run commands give by a vector of string
+///
+/// # Examples
+/// ```
+/// let commands = [
+///     "ls -al".to_string()
+/// ].to_vec();
+///
+/// run_commands(&commands);
+/// ```
 pub fn run_commands(cmds: &Vec<String>) {
     for command in cmds {
         let mut args: Vec<&str> = command.split(' ').collect();
