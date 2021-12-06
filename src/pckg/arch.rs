@@ -1,9 +1,8 @@
 use crate::{installer::Installer, log::*};
 use std::process::Command;
 
-pub struct Arch {}
+pub struct Arch;
 
-// TODO: Need a verification on a arch distribution
 impl Installer for Arch {
     fn all(&self, root: &String) -> Vec<String> {
         vec![

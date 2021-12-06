@@ -1,7 +1,7 @@
 use crate::{dir, installer::Installer, log::*};
 use std::process::Command;
 
-pub struct Fedora {}
+pub struct Fedora;
 
 impl Installer for Fedora {
     fn all(&self, root: &String) -> Vec<String> {

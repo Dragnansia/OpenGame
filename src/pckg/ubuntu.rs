@@ -1,7 +1,7 @@
 use crate::{dir, installer::Installer, log::*, net::get};
 use std::process::Command;
 
-pub struct Ubuntu {}
+pub struct Ubuntu;
 
 impl Installer for Ubuntu {
     fn all(&self, root: &String) -> Vec<String> {
