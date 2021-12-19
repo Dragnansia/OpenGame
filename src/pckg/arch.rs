@@ -24,7 +24,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            error!("No Aur package manager found for this arch distro");
+            error!("No AUR package manager found for this Arch distro");
             vec![]
         } else {
             vec![format!(
@@ -38,7 +38,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            error!("No Aur package manager found for this arch distro");
+            error!("No AUR package manager found for this Arch distro");
             vec![]
         } else {
             vec![format!("{} goverlay-bin -y --needed --noconfirm", aur)]
@@ -49,7 +49,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            error!("No Aur package manager found for this arch distro");
+            error!("No AUR package manager found for this Arch distro");
             vec![]
         } else {
             vec![format!("{} replay-sorcery -y --needed --noconfirm", aur)]
@@ -60,7 +60,7 @@ impl Installer for Arch {
         let aur = get_aur_package_manager();
 
         if aur.is_empty() {
-            error!("No Aur package manager found for this arch distro");
+            error!("No AUR package manager found for this Arch distro");
             vec![]
         } else {
             vec![format!("{} minigalaxy -y --needed --noconfirm", aur)]

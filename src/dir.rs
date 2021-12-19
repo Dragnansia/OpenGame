@@ -24,7 +24,7 @@ pub fn temp_dir() -> Result<String, &'static str> {
 
             if !Path::new(&temp_dir).exists() {
                 let _ = fs::create_dir_all(&temp_dir);
-                success!("Create temp folder");
+                success!("Create temp directory");
             }
 
             Ok(temp_dir)

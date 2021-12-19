@@ -6,7 +6,7 @@ mod ubuntu;
 use crate::log::*;
 use std::process::Command;
 
-/// Run commands give by a vector of string
+/// Run commands provided by a vector of string
 ///
 /// # Examples
 /// ```
