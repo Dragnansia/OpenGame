@@ -15,7 +15,7 @@ fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
         .version("0.0.1")
         .author("RomualdAuc")
-        .about("A simple program to install gaming dependencies on linux computer")
+        .about("A simple program to install gaming dependencies on Linux computer")
         .subcommand(
             SubCommand::with_name("proton")
                 .about("ProtonGE gestion (Install / Remove / List)")
@@ -44,7 +44,7 @@ fn matches_argument() -> ArgMatches<'static> {
                     Arg::with_name("list")
                         .short("l")
                         .long("list")
-                        .help("Print all version of proton install")
+                        .help("Print all versions of Proton installs")
                         .takes_value(false),
                 )
                 .arg(
@@ -58,13 +58,13 @@ fn matches_argument() -> ArgMatches<'static> {
                     Arg::with_name("clean")
                         .short("c")
                         .long("clean")
-                        .help("remove the cache dir of protonge")
+                        .help("Remove the cache directory of ProtonGE")
                         .takes_value(false),
                 ),
         )
         .subcommand(
             SubCommand::with_name("gaming")
-                .about("Install gaming dependencies, install all dependencies if no FLAGS is add")
+                .about("Install gaming dependencies, install all dependencies if no FLAGS are added")
                 .arg(
                     Arg::with_name("gaming")
                         .short("g")

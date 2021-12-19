@@ -41,7 +41,7 @@ pub fn install_version(_version_name: &str, _steam: &Steam) {
             let assets = r["assets"].as_array().unwrap();
             download_and_install_proton(assets, _steam);
 
-            success!("Installation of {} is finish", tag_name);
+            success!("Installation of {} is finished", tag_name);
             break;
         }
     }
@@ -53,7 +53,7 @@ pub fn install_archive_version(path: &str, _steam: &Steam) {
     let mut archive = Archive::new(tar);
     log!("Extract {}", &path);
     let _ = archive.unpack(&_steam.proton_path);
-    success!("Installation of {} is finish", path);
+    success!("Installation of {} is finished", path);
 }
 
 fn download_and_install_proton(assets: &Vec<Value>, _steam: &Steam) -> Option<()> {
@@ -81,11 +81,11 @@ pub fn update_protonge(_steam: &Steam) {
     let name_release = last_release["tag_name"].as_str().unwrap();
 
     match _steam.is_installed(&format!("Proton-{}", name_release)) {
-        true => warning!("The latest ProtonGE version is already install"),
+        true => warning!("The latest ProtonGE version is already installed"),
         false => {
             let assets = last_release["assets"].as_array().unwrap();
             download_and_install_proton(assets, _steam);
-            success!("Installation of {} is finish", name_release);
+            success!("Installation of {} is finished", name_release);
         }
     }
 }
@@ -100,14 +100,14 @@ pub fn remove_version(_version_name: &str, _steam: &Steam) {
             Err(err) => error!("{}", err.to_string()),
         }
     } else {
-        warning!("{} is not install", _version_name);
+        warning!("{} is not installed", _version_name);
     }
 }
 
 pub fn list_version(_steam: &Steam) {
     let proton_version = &_steam.proton_version;
     match proton_version.is_empty() {
-        true => warning!("No Proton installed"),
+        true => warning!("No Proton version installed"),
         false => {
             log!("Proton version installed:");
             for pe in proton_version {
