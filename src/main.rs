@@ -18,7 +18,7 @@ fn matches_argument() -> ArgMatches<'static> {
         .about("A simple program to install gaming dependencies on Linux computer")
         .subcommand(
             SubCommand::with_name("proton")
-                .about("ProtonGE gestion (Install / Remove / List)")
+                .about("ProtonGE management (Install / Remove / List)")
                 .arg(
                     Arg::with_name("install")
                         .short("i")
