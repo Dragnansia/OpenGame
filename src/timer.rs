@@ -10,6 +10,6 @@ pub fn get_duration(timer: &SystemTime) -> u64 {
     if let Ok(seconds) = timer.elapsed() {
         seconds.as_secs()
     } else {
-        -1
+        u64::MAX
     }
 }

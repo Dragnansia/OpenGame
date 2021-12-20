@@ -7,7 +7,7 @@ use reqwest::{
     Client,
 };
 use serde_json::Value;
-use std::{cmp::min, fs::File, io::Write, process::exit};
+use std::{cmp::min, fs::File, io::Write};
 
 fn basic_headers() -> HeaderMap<HeaderValue> {
     let mut headers = HeaderMap::new();
@@ -24,7 +24,7 @@ pub async fn get(url: &str) -> Value {
 }
 
 // Todo: Add a Result for return for check if this download is ok
-pub async fn download_file(url: &str, path: &str) {
+pub async fn download_file(url: &str, path: &str) -> Result<String, String> {
     let v = path.split("/").last().unwrap();
 
     let client = Client::new();
@@ -40,14 +40,13 @@ pub async fn download_file(url: &str, path: &str) {
     pb.set_style(ProgressStyle::default_bar()
             .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
             .progress_chars("#>-"));
-    pb.set_message(format!("-> Downloading {}", v));
+    pb.set_message(format!("-> Downloading {}", &v));
 
     let mut file = match File::create(&path) {
         Ok(fc) => fc,
         Err(err) => {
             error!("Failed to create file: {}", &path);
-            error!("{}", err.to_string());
-            exit(-1);
+            return Err(err.to_string());
         }
     };
     let mut downloaded: u64 = 0;
@@ -65,4 +64,6 @@ pub async fn download_file(url: &str, path: &str) {
         downloaded = min(downloaded + (chunk.len() as u64), size);
         pb.set_position(downloaded);
     }
+
+    Ok(v.to_string())
 }

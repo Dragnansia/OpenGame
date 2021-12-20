@@ -1,4 +1,4 @@
-use crate::{dir, downloader, log::*, steam::Steam};
+use crate::{dir, downloader, log::*, steam::Steam, timer};
 use flate2::read::GzDecoder;
 use serde_json::Value;
 use std::{
@@ -38,10 +38,20 @@ pub async fn install_version(version_name: &str, steam: &Steam) {
         if tag_name.starts_with(version_name)
             && !steam.is_installed(&format!("Proton-{}", tag_name))
         {
+            let timer = timer::current_time();
             let assets = r["assets"].as_array().unwrap();
-            download_and_install_proton(assets, steam).await.unwrap();
+            if !assets.is_empty() {
+                download_and_install_proton(assets, steam).await.unwrap();
 
-            success!("Installation of {} is finished", tag_name);
+                success!(
+                    "{} installation done ({} secs)",
+                    tag_name,
+                    timer::get_duration(&timer)
+                );
+            } else {
+                warning!("{} don't have any assets to download", tag_name);
+            }
+
             break;
         }
     }
@@ -52,8 +62,13 @@ pub fn install_archive_version(path: &str, steam: &Steam) {
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
     log!("Extract {}", &path);
+    let timer = timer::current_time();
     archive.unpack(&steam.proton_path).unwrap();
-    success!("Installation of {} is finished", path);
+    success!(
+        "{} unzip done ({} sec(s))",
+        path,
+        timer::get_duration(&timer)
+    );
 }
 
 async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Option<()> {
@@ -64,8 +79,14 @@ async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Opti
             let final_path = format!("{}{}", path?, name);
 
             let url = a["browser_download_url"].as_str().unwrap();
-            downloader::download_file(url, &final_path).await;
-            install_archive_version(&final_path, steam);
+            let timer = timer::current_time();
+            match downloader::download_file(url, &final_path).await {
+                Ok(d) => {
+                    success!("{} is download ({} sec(s))", d, timer::get_duration(&timer));
+                    install_archive_version(&final_path, steam);
+                }
+                Err(err) => error!("{}", err),
+            }
 
             break;
         }

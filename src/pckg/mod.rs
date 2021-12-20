@@ -3,7 +3,7 @@ mod fedora;
 pub mod installer;
 mod ubuntu;
 
-use crate::log::*;
+use crate::{log::*, timer};
 use std::process::Command;
 
 /// Run commands provided by a vector of string
@@ -18,6 +18,8 @@ use std::process::Command;
 /// ```
 pub fn run_commands(cmds: &Vec<String>) {
     for command in cmds {
+        let timer = timer::current_time();
+
         let mut args: Vec<&str> = command.split(' ').collect();
         let cmd = args[0];
         args.remove(0);
@@ -26,7 +28,10 @@ pub fn run_commands(cmds: &Vec<String>) {
         match res {
             Ok(s) => {
                 if s.success() {
-                    success!("No error on last command");
+                    success!(
+                        "No error on last command ({} sec(s))",
+                        timer::get_duration(&timer)
+                    );
                 } else {
                     error!("Command error code: {}", s.code().unwrap());
                 }
