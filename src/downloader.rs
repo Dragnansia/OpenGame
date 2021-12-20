@@ -62,8 +62,7 @@ pub async fn download_file(url: &str, path: &str) {
             .or(Err(format!("Error while writing to file")))
             .unwrap();
 
-        let new = min(downloaded + (chunk.len() as u64), size);
-        downloaded = new;
-        pb.set_position(new);
+        downloaded = min(downloaded + (chunk.len() as u64), size);
+        pb.set_position(downloaded);
     }
 }

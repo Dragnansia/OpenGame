@@ -18,7 +18,7 @@ pub fn remove_cache() -> Option<()> {
         let res = fs::remove_dir_all(path);
 
         match res {
-            Ok(_r) => {
+            Ok(_) => {
                 let _ = fs::create_dir_all(&path);
                 success!("Cache folder for ProtonGE is removed");
             }
@@ -52,7 +52,7 @@ pub fn install_archive_version(path: &str, steam: &Steam) {
     let tar = GzDecoder::new(tar_gz);
     let mut archive = Archive::new(tar);
     log!("Extract {}", &path);
-    let _ = archive.unpack(&steam.proton_path);
+    archive.unpack(&steam.proton_path).unwrap();
     success!("Installation of {} is finished", path);
 }
 

@@ -13,7 +13,7 @@ pub fn format_tmp_dir(folder: &str, create_if_not_exist: bool) -> Option<String>
 
             Some(dir)
         }
-        Err(_err) => None,
+        Err(_) => None,
     }
 }
 
@@ -36,6 +36,6 @@ pub fn temp_dir() -> Result<String, &'static str> {
 pub fn user_dir() -> Result<String, &'static str> {
     match std::env::var("HOME") {
         Ok(hd) => Ok(hd),
-        Err(_err) => Err("Can't find home directory"),
+        Err(_) => Err("Can't find home directory"),
     }
 }
