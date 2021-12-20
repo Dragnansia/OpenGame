@@ -3,6 +3,7 @@
 mod dir;
 mod downloader;
 mod log;
+mod timer;
 mod pckg;
 mod proton;
 mod steam;
@@ -14,7 +15,6 @@ use steam::Steam;
 fn matches_argument() -> ArgMatches<'static> {
     App::new("og")
         .version("0.0.1")
-        .author("RomualdAuc")
         .about("A simple program to install gaming dependencies on Linux computer")
         .subcommand(
             SubCommand::with_name("proton")
