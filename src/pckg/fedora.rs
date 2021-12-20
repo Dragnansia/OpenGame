@@ -3,8 +3,9 @@ use std::process::Command;
 
 pub struct Fedora;
 
+#[async_trait::async_trait]
 impl Installer for Fedora {
-    fn all(&self, root: &String) -> Vec<String> {
+    async fn all(&self, root: &String) -> Vec<String> {
         let fedora_version = find_version();
 
         if fedora_version < 33 {
@@ -25,7 +26,7 @@ impl Installer for Fedora {
         }
     }
 
-    fn gaming(&self, root: &String) -> Vec<String> {
+    async fn gaming(&self, root: &String) -> Vec<String> {
         let fedora_version = find_version();
 
         if fedora_version < 33 {
@@ -45,11 +46,11 @@ impl Installer for Fedora {
         }
     }
 
-    fn lutris(&self, root: &String) -> Vec<String> {
+    async fn lutris(&self, root: &String) -> Vec<String> {
         vec![format!("{} dnf install lutris -y", root)]
     }
 
-    fn heroic_launcher(&self, root: &String) -> Vec<String> {
+    async fn heroic_launcher(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} dnf copr enable atim/heroic-games-launcher -y", root),
             format!("{} dnf update -y", root),
@@ -57,11 +58,11 @@ impl Installer for Fedora {
         ]
     }
 
-    fn overlay(&self, root: &String) -> Vec<String> {
+    async fn overlay(&self, root: &String) -> Vec<String> {
         vec![format!("{} dnf install goverlay -y", root)]
     }
 
-    fn replay_sorcery(&self, root: &String) -> Vec<String> {
+    async fn replay_sorcery(&self, root: &String) -> Vec<String> {
         let destination = format!(
             "{}ReplaySorcery",
             dir::format_tmp_dir("gaming", true).unwrap_or_default()
@@ -79,7 +80,7 @@ impl Installer for Fedora {
         ]
     }
 
-    fn mini_galaxy(&self, root: &String) -> Vec<String> {
+    async fn mini_galaxy(&self, root: &String) -> Vec<String> {
         vec![format!("{} dnf install minigalaxy", root)]
     }
 }

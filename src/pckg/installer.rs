@@ -7,14 +7,15 @@ use std::{
     process::Command,
 };
 
+#[async_trait::async_trait]
 pub trait Installer {
-    fn all(&self, root: &String) -> Vec<String>;
-    fn gaming(&self, root: &String) -> Vec<String>;
-    fn lutris(&self, root: &String) -> Vec<String>;
-    fn heroic_launcher(&self, root: &String) -> Vec<String>;
-    fn overlay(&self, root: &String) -> Vec<String>;
-    fn replay_sorcery(&self, root: &String) -> Vec<String>;
-    fn mini_galaxy(&self, root: &String) -> Vec<String>;
+    async fn all(&self, root: &String) -> Vec<String>;
+    async fn gaming(&self, root: &String) -> Vec<String>;
+    async fn lutris(&self, root: &String) -> Vec<String>;
+    async fn heroic_launcher(&self, root: &String) -> Vec<String>;
+    async fn overlay(&self, root: &String) -> Vec<String>;
+    async fn replay_sorcery(&self, root: &String) -> Vec<String>;
+    async fn mini_galaxy(&self, root: &String) -> Vec<String>;
 }
 
 pub fn root_command() -> String {

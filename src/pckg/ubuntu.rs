@@ -1,10 +1,11 @@
-use crate::{dir, installer::Installer, log::*, net::get};
+use crate::{dir, downloader::get, installer::Installer, log::*};
 use std::process::Command;
 
 pub struct Ubuntu;
 
+#[async_trait::async_trait]
 impl Installer for Ubuntu {
-    fn all(&self, root: &String) -> Vec<String> {
+    async fn all(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -27,7 +28,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn gaming(&self, root: &String) -> Vec<String> {
+    async fn gaming(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -48,7 +49,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn lutris(&self, root: &String) -> Vec<String> {
+    async fn lutris(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -58,7 +59,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn heroic_launcher(&self, _root: &String) -> Vec<String> {
+    async fn heroic_launcher(&self, _root: &String) -> Vec<String> {
         match dir::user_dir() {
             Ok(ud) => vec![
                 "curl -o heroic.AppImage -LJO $(curl -s https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases | grep browser_download_url | grep '[.]AppImage' | head -n 1 | cut -d '\"' -f 4)".to_string(),
@@ -74,7 +75,7 @@ impl Installer for Ubuntu {
         }
     }
 
-    fn overlay(&self, root: &String) -> Vec<String> {
+    async fn overlay(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} dpkg --add-architecture i386", root),
             format!("{} add-apt-repository -y ppa:flexiondotorg/mangohud", root),
@@ -83,7 +84,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn replay_sorcery(&self, root: &String) -> Vec<String> {
+    async fn replay_sorcery(&self, root: &String) -> Vec<String> {
         let destination = format!(
             "{}ReplaySorcery",
             dir::format_tmp_dir("gaming", true).unwrap_or_default()
@@ -109,13 +110,13 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn mini_galaxy(&self, root: &String) -> Vec<String> {
+    async fn mini_galaxy(&self, root: &String) -> Vec<String> {
         match dir::user_dir() {
             Ok(dir) => vec![
                 format!(
                     "curl -o {}/minigalaxy.deb -LJO {}",
                     dir,
-                    find_mini_galaxy_last_release()
+                    find_mini_galaxy_last_release().await
                 ),
                 format!("{} apt install {}/minigalaxy.deb", root, dir),
                 format!("{} rm -f {}/minigalaxy.deb", root, dir),
@@ -129,8 +130,8 @@ impl Installer for Ubuntu {
 }
 
 // Todo: find a better way to return the result
-fn find_mini_galaxy_last_release() -> String {
-    let res = get("https://api.github.com/repos/sharkwouter/minigalaxy/releases");
+async fn find_mini_galaxy_last_release() -> String {
+    let res = get("https://api.github.com/repos/sharkwouter/minigalaxy/releases").await;
     let arr = res.as_array().unwrap();
     let assets = &arr[0]["assets"].as_array().unwrap()[0];
     let url = assets["browser_download_url"].as_str().unwrap_or_default();

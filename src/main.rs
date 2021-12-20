@@ -1,8 +1,8 @@
 #![feature(allow_internal_unstable)]
 
 mod dir;
+mod downloader;
 mod log;
-mod net;
 mod pckg;
 mod proton;
 mod steam;
@@ -64,7 +64,9 @@ fn matches_argument() -> ArgMatches<'static> {
         )
         .subcommand(
             SubCommand::with_name("gaming")
-                .about("Install gaming dependencies, install all dependencies if no FLAGS are added")
+                .about(
+                    "Install gaming dependencies, install all dependencies if no FLAGS are added",
+                )
                 .arg(
                     Arg::with_name("gaming")
                         .short("g")
@@ -111,14 +113,15 @@ fn matches_argument() -> ArgMatches<'static> {
         .get_matches()
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let matches = matches_argument();
 
     if let Some(matches) = matches.subcommand_matches("proton") {
         match Steam::new() {
             Ok(steam) => {
                 if matches.is_present("install") {
-                    proton::install_version(matches.value_of("install").unwrap(), &steam);
+                    proton::install_version(matches.value_of("install").unwrap(), &steam).await;
                 }
 
                 if matches.is_present("remove") {
@@ -134,7 +137,7 @@ fn main() {
                 }
 
                 if matches.is_present("update") {
-                    proton::update_protonge(&steam);
+                    proton::update_protonge(&steam).await;
                 }
 
                 if matches.is_present("clean") {
@@ -150,30 +153,30 @@ fn main() {
         match installer::find_installer() {
             Ok(commands) => {
                 if matches.args.len() == 0 {
-                    run_commands(&commands.all(&root));
+                    run_commands(&commands.all(&root).await);
                 } else {
                     if matches.is_present("gaming") {
-                        run_commands(&commands.gaming(&root));
+                        run_commands(&commands.gaming(&root).await);
                     }
 
                     if matches.is_present("lutris") {
-                        run_commands(&commands.lutris(&root));
+                        run_commands(&commands.lutris(&root).await);
                     }
 
                     if matches.is_present("heroic") {
-                        run_commands(&commands.heroic_launcher(&root));
+                        run_commands(&commands.heroic_launcher(&root).await);
                     }
 
                     if matches.is_present("overlay") {
-                        run_commands(&commands.overlay(&root));
+                        run_commands(&commands.overlay(&root).await);
                     }
 
                     if matches.is_present("replay-sorcery") {
-                        run_commands(&commands.replay_sorcery(&root));
+                        run_commands(&commands.replay_sorcery(&root).await);
                     }
 
                     if matches.is_present("minigalaxy") {
-                        run_commands(&commands.mini_galaxy(&root));
+                        run_commands(&commands.mini_galaxy(&root).await);
                     }
                 }
             }
