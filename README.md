@@ -21,6 +21,15 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 </details>
 
 <details>
+<summary>Build</summary>
+Use [cross](https://github.com/rust-embedded/cross) to compile with target `x86_64-unknown-linux-gnu`
+
+```shell
+cross build --target x86_64-unknown-linux-gnu --release
+```
+</details>
+
+<details>
 <summary>Installation</summary>
 Install curl on your system to use installation command
 
