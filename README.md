@@ -13,6 +13,7 @@ OpenGame (OG) is a gaming dependencies and ProtonGE (like protonup) installer fo
 
 <details>
 <summary>Dependencies</summary>
+
 Install curl on your system to use installation command
 
 ```shell
@@ -22,7 +23,10 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 <details>
 <summary>Build</summary>
-Use [cross](https://github.com/rust-embedded/cross) to compile with target `x86_64-unknown-linux-gnu`
+
+Use <a target="_blank" href="https://github.com/rust-embedded/cross">cross</a> to compile for
+a release with target `x86_64-unknown-linux-gnu`<br>
+You can use `cargo build` or `cargo run` for debug
 
 ```shell
 cross build --target x86_64-unknown-linux-gnu --release
@@ -31,6 +35,7 @@ cross build --target x86_64-unknown-linux-gnu --release
 
 <details>
 <summary>Installation</summary>
+
 Install curl on your system to use installation command
 
 ```shell
@@ -49,5 +54,5 @@ rm ~/bin/opengame
 <details>
 <summary>Other projects</summary>
 
-+ [LibreGaming](https://github.com/Ahmed-Al-Balochi/LibreGaming)
++ <a target="_blank" href="https://github.com/Ahmed-Al-Balochi/LibreGaming">LibreGaming</a>
 </details>
