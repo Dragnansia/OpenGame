@@ -1,5 +1,4 @@
 use crate::{dir, downloader, log::*, steam::Steam, timer};
-use flate2::read::GzDecoder;
 use serde_json::Value;
 use std::{
     fs::{self, File},
@@ -52,15 +51,16 @@ pub async fn install_version(version_name: &str, steam: &Steam) {
                 warning!("{} don't have any assets to download", tag_name);
             }
 
-            break;
+            return;
         }
     }
+
+    warning!("No version found with this name: {}", version_name);
 }
 
 pub fn install_archive_version(path: &str, steam: &Steam) {
-    let tar_gz = File::open(&path).unwrap();
-    let tar = GzDecoder::new(tar_gz);
-    let mut archive = Archive::new(tar);
+    let tar_gz = File::create(path).unwrap();
+    let mut archive = Archive::new(tar_gz);
     log!("Extract {}", &path);
     let timer = timer::current_time();
     archive.unpack(&steam.proton_path).unwrap();
