@@ -10,13 +10,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  cross:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Installation
-        run: cargo install cross
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -32,7 +25,6 @@ jobs:
       run: cargo test
  
   build:
-    needs: [cross]
     runs-on: ubuntu-latest
     strategy:
       matrix:
