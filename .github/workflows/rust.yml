@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy
+        target: ${{ matrix.target }}
     - name: Run tests
       run: cargo test --verbose
  
@@ -34,5 +41,12 @@ jobs:
           - i686-unknown-linux-gnu
     steps:
     - uses: actions/checkout@v2
+    - name: Install latest nightly
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true
+        components: rustfmt, clippy, cross
+        target: ${{ matrix.target }}
     - name: Build
       run: cross build --target ${{ matrix.target }} --release --verbose
