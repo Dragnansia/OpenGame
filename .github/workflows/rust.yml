@@ -29,7 +29,7 @@ jobs:
         components: rustfmt, clippy
         target: ${{ matrix.target }}
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test
  
   build:
     needs: [cross]
@@ -46,7 +46,9 @@ jobs:
       with:
         toolchain: nightly
         override: true
-        components: rustfmt, clippy, cross
+        components: rustfmt, clippy
         target: ${{ matrix.target }}
+    - name: Install Cross
+      run: cargo install cross
     - name: Build
-      run: cross build --target ${{ matrix.target }} --release --verbose
+      run: cross build --target ${{ matrix.target }} --release
