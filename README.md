@@ -26,7 +26,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Use <a target="_blank" href="https://github.com/rust-embedded/cross">cross</a> to compile for
 a release with target `x86_64-unknown-linux-gnu`<br>
-You can use `cargo build` or `cargo run` for debug
+You can use `cargo check` or `cargo run` for debug
 
 ```shell
 cross build --target x86_64-unknown-linux-gnu --release
