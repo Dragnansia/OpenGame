@@ -1,11 +1,12 @@
-use crate::{dir, downloader::get, installer::Installer, log::*};
+use crate::{dir, installer::Installer, log::*};
+use reqwest::blocking;
+use serde_json::Value;
 use std::process::Command;
 
 pub struct Ubuntu;
 
-#[async_trait::async_trait]
 impl Installer for Ubuntu {
-    async fn all(&self, root: &String) -> Vec<String> {
+    fn all(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -28,7 +29,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    async fn gaming(&self, root: &String) -> Vec<String> {
+    fn gaming(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -49,7 +50,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    async fn lutris(&self, root: &String) -> Vec<String> {
+    fn lutris(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -59,7 +60,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    async fn heroic_launcher(&self, _root: &String) -> Vec<String> {
+    fn heroic_launcher(&self, _root: &String) -> Vec<String> {
         match dir::user_dir() {
             Ok(ud) => vec![
                 "curl -o heroic.AppImage -LJO $(curl -s https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases | grep browser_download_url | grep '[.]AppImage' | head -n 1 | cut -d '\"' -f 4)".to_string(),
@@ -75,7 +76,7 @@ impl Installer for Ubuntu {
         }
     }
 
-    async fn overlay(&self, root: &String) -> Vec<String> {
+    fn overlay(&self, root: &String) -> Vec<String> {
         vec![
             format!("{} dpkg --add-architecture i386", root),
             format!("{} add-apt-repository -y ppa:flexiondotorg/mangohud", root),
@@ -84,7 +85,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    async fn replay_sorcery(&self, root: &String) -> Vec<String> {
+    fn replay_sorcery(&self, root: &String) -> Vec<String> {
         let destination = format!(
             "{}ReplaySorcery",
             dir::format_tmp_dir("gaming", true).unwrap_or_default()
@@ -110,13 +111,13 @@ impl Installer for Ubuntu {
         ]
     }
 
-    async fn mini_galaxy(&self, root: &String) -> Vec<String> {
+    fn mini_galaxy(&self, root: &String) -> Vec<String> {
         match dir::user_dir() {
             Ok(dir) => vec![
                 format!(
                     "curl -o {}/minigalaxy.deb -LJO {}",
                     dir,
-                    find_mini_galaxy_last_release().await
+                    find_mini_galaxy_last_release()
                 ),
                 format!("{} apt install {}/minigalaxy.deb", root, dir),
                 format!("{} rm -f {}/minigalaxy.deb", root, dir),
@@ -130,12 +131,18 @@ impl Installer for Ubuntu {
 }
 
 // Todo: find a better way to return the result
-async fn find_mini_galaxy_last_release() -> String {
-    let res = get("https://api.github.com/repos/sharkwouter/minigalaxy/releases").await;
-    let arr = res.as_array().unwrap();
-    let assets = &arr[0]["assets"].as_array().unwrap()[0];
-    let url = assets["browser_download_url"].as_str().unwrap_or_default();
-    String::from(url)
+fn find_mini_galaxy_last_release() -> String {
+    if let Ok(res) = blocking::get("https://api.github.com/repos/sharkwouter/minigalaxy/releases") {
+        let data = res.text().unwrap();
+        let res: Value = serde_json::from_str(&data).unwrap();
+
+        let arr = res.as_array().unwrap();
+        let assets = &arr[0]["assets"].as_array().unwrap()[0];
+        let url = assets["browser_download_url"].as_str().unwrap_or_default();
+        String::from(url)
+    } else {
+        String::new()
+    }
 }
 
 fn release_code_name() -> String {
