@@ -59,7 +59,7 @@ pub struct Gaming {
     /// Install Lutris
     pub lutris: bool,
 
-    #[clap(short = 'e', long)]
+    #[clap(short = 'H', long)]
     /// Install Heroic Launcher
     pub heroic: bool,
 
