@@ -1,3 +1,4 @@
+use crate::{error::unv, pckg::installer::Installer, proton, steam::Steam};
 use clap::{AppSettings, Args, Parser, Subcommand};
 
 #[derive(Parser)]
@@ -45,6 +46,36 @@ pub struct Proton {
     pub clean: bool,
 }
 
+impl Proton {
+    pub async fn run(&self, steam: Steam) -> Result<(), unv::Error> {
+        if let Some(v) = &self.install {
+            proton::install_version(v, &steam).await?;
+        }
+
+        if self.update {
+            proton::update_protonge(&steam).await;
+        }
+
+        if let Some(p) = &self.archive {
+            proton::install_archive_version(p, &steam);
+        }
+
+        if self.list {
+            proton::list_version(&steam);
+        }
+
+        if let Some(v) = &self.remove {
+            proton::remove_version(v, &steam)?;
+        }
+
+        if self.clean {
+            proton::remove_cache()?;
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(Args)]
 pub struct Gaming {
     #[clap(short, long)]
@@ -74,4 +105,40 @@ pub struct Gaming {
     #[clap(short, long)]
     /// Install MiniGalaxy
     pub mini_galaxy: bool,
+}
+
+impl Gaming {
+    pub fn commands(&self, installer: &dyn Installer, root: String) -> Vec<String> {
+        let mut commands = vec![];
+
+        if self.all {
+            commands.append(&mut installer.all(&root));
+        } else {
+            if self.gaming {
+                commands.append(&mut installer.gaming(&root));
+            }
+
+            if self.lutris {
+                commands.append(&mut installer.lutris(&root));
+            }
+
+            if self.heroic {
+                commands.append(&mut installer.heroic_launcher(&root));
+            }
+
+            if self.overlay {
+                commands.append(&mut installer.overlay(&root));
+            }
+
+            if self.replay_sorcery {
+                commands.append(&mut installer.replay_sorcery(&root));
+            }
+
+            if self.mini_galaxy {
+                commands.append(&mut installer.mini_galaxy(&root));
+            }
+        }
+
+        commands
+    }
 }
