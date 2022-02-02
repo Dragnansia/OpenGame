@@ -1,4 +1,4 @@
-use crate::{dir, downloader, log::*, steam::Steam, timer};
+use crate::{downloader, error::dir, log::*, steam::Steam, timer};
 use serde_json::Value;
 use std::{
     fs::{self, File},
@@ -8,54 +8,50 @@ use tar::Archive;
 
 const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";
 
-pub fn remove_cache() -> Option<()> {
-    let po = dir::format_tmp_dir("proton", false);
-    let p = po?;
-    let path = Path::new(&p);
+pub fn remove_cache() -> Result<(), dir::Error> {
+    let po = crate::dir::format_tmp_dir("proton", false)?;
+    let path = Path::new(&po);
 
     if path.exists() {
-        let res = fs::remove_dir_all(path);
-
-        match res {
-            Ok(_) => {
-                let _ = fs::create_dir_all(&path);
-                success!("Cache folder for ProtonGE is removed");
-            }
-            Err(err) => error!("Can't remove cache folder: {}", err),
-        }
+        fs::remove_dir_all(path)?;
+        fs::create_dir_all(&path)?;
+        success!("Cache folder for ProtonGE is removed");
     }
 
-    Some(())
+    Ok(())
 }
 
-pub async fn install_version(version_name: &str, steam: &Steam) {
+pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
     let releases = downloader::get(GITHUB_API).await;
     let arr = releases.as_array().unwrap();
 
     for r in arr {
-        let tag_name = r["tag_name"].as_str().unwrap();
+        let tag_name = r["tag_name"].as_str().unwrap_or("Error");
         if tag_name.starts_with(version_name)
             && !steam.is_installed(&format!("Proton-{}", tag_name))
         {
             let timer = timer::current_time();
-            let assets = r["assets"].as_array().unwrap();
-            if !assets.is_empty() {
-                download_and_install_proton(assets, steam).await.unwrap();
+
+            if let Some(assets) = r["assets"].as_array() {
+                if assets.is_empty() {
+                    warning!("{} don't have any assets to download", tag_name);
+                    break;
+                }
+
+                download_and_install_proton(assets, steam).await?;
 
                 success!(
                     "{} installation done ({} secs)",
                     tag_name,
                     timer::get_duration(&timer)
                 );
-            } else {
-                warning!("{} don't have any assets to download", tag_name);
             }
 
-            return;
+            return Ok(());
         }
     }
 
-    warning!("No version found with this name: {}", version_name);
+    Err("No version found with this name".into())
 }
 
 pub fn install_archive_version(path: &str, steam: &Steam) {
@@ -71,69 +67,63 @@ pub fn install_archive_version(path: &str, steam: &Steam) {
     );
 }
 
-async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Option<()> {
+async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Result<(), dir::Error> {
     for a in assets {
         let name = a["name"].as_str().unwrap();
         if name.ends_with(".tar.gz") {
-            let path = dir::format_tmp_dir("proton", true);
-            let final_path = format!("{}{}", path?, name);
+            let path = crate::dir::format_tmp_dir("proton", true)?;
+            let final_path = format!("{}{}", path, name);
 
             let url = a["browser_download_url"].as_str().unwrap();
             let timer = timer::current_time();
-            match downloader::download_file(url, &final_path).await {
-                Ok(d) => {
-                    success!("{} is download ({} sec(s))", d, timer::get_duration(&timer));
-                    install_archive_version(&final_path, steam);
-                }
-                Err(err) => error!("{}", err),
-            }
+            let d = downloader::download_file(url, &final_path).await?;
+            success!("{} is download ({} sec(s))", d, timer::get_duration(&timer));
+            install_archive_version(&final_path, steam);
 
             break;
         }
     }
 
+    Ok(())
+}
+
+pub async fn update_protonge(steam: &Steam) -> Option<()> {
+    let res = downloader::get(&format!("{}{}", GITHUB_API, "?per_page=1")).await;
+    let last_release = &res.as_array()?[0];
+
+    let name_release = last_release["tag_name"].as_str()?;
+    if steam.is_installed(&format!("Proton-{}", name_release)) {
+        warning!("The latest ProtonGE version is already installed")
+    } else {
+        let assets = last_release["assets"].as_array()?;
+        download_and_install_proton(assets, steam).await.ok()?;
+        success!("Installation of {} is finished", name_release);
+    }
+
     Some(())
 }
 
-pub async fn update_protonge(steam: &Steam) {
-    let res = downloader::get(&format!("{}{}", GITHUB_API, "?per_page=1")).await;
-    let last_release = &res.as_array().unwrap()[0];
-
-    let name_release = last_release["tag_name"].as_str().unwrap();
-
-    match steam.is_installed(&format!("Proton-{}", name_release)) {
-        true => warning!("The latest ProtonGE version is already installed"),
-        false => {
-            let assets = last_release["assets"].as_array().unwrap();
-            download_and_install_proton(assets, steam).await;
-            success!("Installation of {} is finished", name_release);
-        }
-    }
-}
-
-pub fn remove_version(version_name: &str, steam: &Steam) {
+pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
     let folder_name = format!("Proton-{}", version_name).to_string();
     if steam.is_installed(&folder_name) {
-        let res = fs::remove_dir_all(&format!("{}{}", steam.proton_path, &folder_name));
-
-        match res {
-            Ok(()) => success!("{} is removed", version_name),
-            Err(err) => error!("{}", err.to_string()),
-        }
+        fs::remove_dir_all(&format!("{}{}", steam.proton_path, &folder_name))?;
+        success!("{} is removed", version_name);
     } else {
         warning!("{} is not installed", version_name);
     }
+
+    Ok(())
 }
 
 pub fn list_version(steam: &Steam) {
     let proton_version = &steam.proton_version;
-    match proton_version.is_empty() {
-        true => warning!("No Proton version installed"),
-        false => {
-            log!("Proton version installed:");
-            for pe in proton_version {
-                log!("- {}", pe);
-            }
+
+    if proton_version.is_empty() {
+        warning!("No Proton version installed");
+    } else {
+        log!("Proton version installed:");
+        for pe in proton_version {
+            log!("- {}", pe);
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::{dir, log::*};
+use crate::{error::dir, log::*};
 use std::{fs, io, path::Path};
 
 pub struct Steam {
@@ -8,27 +8,23 @@ pub struct Steam {
 }
 
 impl Steam {
-    pub fn new() -> Result<Self, &'static str> {
-        match Steam::fpath() {
-            Ok(st_path) => {
-                let proton_path = Steam::ppath(&st_path);
-                Ok(Self {
-                    path: st_path.clone(),
-                    proton_path: proton_path.clone(),
-                    proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
-                })
-            }
-            Err(err) => Err(err),
-        }
+    pub fn new() -> Result<Self, dir::Error> {
+        let st_path = Steam::fpath()?;
+        let proton_path = Steam::ppath(&st_path);
+        Ok(Self {
+            path: st_path,
+            proton_path: proton_path.clone(),
+            proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+        })
     }
 
     // find steam path
-    fn fpath() -> Result<String, &'static str> {
-        let steam_path = format!("{}{}", dir::user_dir()?, "/.steam/");
+    fn fpath() -> Result<String, dir::Error> {
+        let steam_path = format!("{}{}", crate::dir::user_dir()?, "/.steam/");
 
         match Path::new(&steam_path).exists() {
             true => Ok(steam_path),
-            false => Err("Can't find any Steam directory"),
+            false => Err("Can't find any Steam directory".into()),
         }
     }
 

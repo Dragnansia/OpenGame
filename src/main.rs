@@ -1,6 +1,7 @@
 mod arguments;
 mod dir;
 mod downloader;
+mod error;
 mod log;
 mod pckg;
 mod proton;
@@ -9,6 +10,7 @@ mod timer;
 
 use arguments::{Cli, Commands};
 use clap::StructOpt;
+use error::unv;
 use pckg::{
     installer::{self},
     run_commands,
@@ -17,7 +19,7 @@ use proton::update_protonge;
 use steam::Steam;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), unv::Error> {
     let args = Cli::parse();
 
     match &args.commands {
@@ -25,7 +27,7 @@ async fn main() {
             let steam = Steam::new();
             if let Ok(steam) = steam {
                 if let Some(v) = &proton.install {
-                    proton::install_version(v, &steam).await;
+                    proton::install_version(v, &steam).await?;
                 }
 
                 if proton.update {
@@ -39,11 +41,13 @@ async fn main() {
                 if proton.list {
                     proton::list_version(&steam);
                 }
+
                 if let Some(v) = &proton.remove {
-                    proton::remove_version(v, &steam)
+                    proton::remove_version(v, &steam)?;
                 }
+
                 if proton.clean {
-                    proton::remove_cache();
+                    proton::remove_cache()?;
                 }
             } else {
                 error!("Steam initialisation error: {}", steam.err().unwrap())
@@ -82,11 +86,13 @@ async fn main() {
                     }
                 }
 
-                run_commands(&commands);
+                run_commands(&commands)?;
             }
             Err(err) => {
                 error!("{}", err.to_string());
             }
         },
     }
+
+    Ok(())
 }
