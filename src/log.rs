@@ -57,14 +57,3 @@ macro_rules! success {
     }}
 }
 pub(crate) use success;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn log() {
-        log!("I'm a log");
-        success!("I'm a success");
-        warning!("I'm a warning");
-        error!("I'm a error");
-    }
-}

@@ -1,4 +1,10 @@
-use crate::{downloader, error::dir, log::*, steam::Steam, timer};
+use crate::{
+    downloader,
+    error::{dir, unv},
+    log::*,
+    steam::Steam,
+    timer,
+};
 use serde_json::Value;
 use std::{
     fs::{self, File},
@@ -21,8 +27,8 @@ pub fn remove_cache() -> Result<(), dir::Error> {
     Ok(())
 }
 
-pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
-    let releases = downloader::get(GITHUB_API).await;
+pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), unv::Error> {
+    let releases = downloader::get(GITHUB_API).await?;
     let arr = releases.as_array().unwrap();
 
     for r in arr {
@@ -67,19 +73,23 @@ pub fn install_archive_version(path: &str, steam: &Steam) {
     );
 }
 
-async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Result<(), dir::Error> {
-    for a in assets {
-        let name = a["name"].as_str().unwrap();
+async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Result<(), unv::Error> {
+    for asset in assets {
+        let name = asset["name"].as_str().unwrap_or_default();
         if name.ends_with(".tar.gz") {
             let path = crate::dir::format_tmp_dir("proton", true)?;
             let final_path = format!("{}{}", path, name);
 
-            let url = a["browser_download_url"].as_str().unwrap();
+            let url = asset["browser_download_url"].as_str().unwrap_or_default();
             let timer = timer::current_time();
-            let d = downloader::download_file(url, &final_path).await?;
-            success!("{} is download ({} sec(s))", d, timer::get_duration(&timer));
-            install_archive_version(&final_path, steam);
+            downloader::download_file(url, &final_path).await?;
+            success!(
+                "{} is download ({} sec(s))",
+                name,
+                timer::get_duration(&timer)
+            );
 
+            install_archive_version(&final_path, steam);
             break;
         }
     }
@@ -88,23 +98,25 @@ async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Resu
 }
 
 pub async fn update_protonge(steam: &Steam) -> Option<()> {
-    let res = downloader::get(&format!("{}{}", GITHUB_API, "?per_page=1")).await;
-    let last_release = &res.as_array()?[0];
+    let url = format!("{}{}", GITHUB_API, "?per_page=1");
+    if let Ok(res) = downloader::get(&url).await {
+        let last_release = &res.as_array()?[0];
 
-    let name_release = last_release["tag_name"].as_str()?;
-    if steam.is_installed(&format!("Proton-{}", name_release)) {
-        warning!("The latest ProtonGE version is already installed")
-    } else {
-        let assets = last_release["assets"].as_array()?;
-        download_and_install_proton(assets, steam).await.ok()?;
-        success!("Installation of {} is finished", name_release);
+        let name_release = last_release["tag_name"].as_str()?;
+        if steam.is_installed(&format!("Proton-{}", name_release)) {
+            warning!("The latest ProtonGE version is already installed")
+        } else {
+            let assets = last_release["assets"].as_array()?;
+            download_and_install_proton(assets, steam).await.ok()?;
+            success!("Installation of {} is finished", name_release);
+        }
     }
 
     Some(())
 }
 
 pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
-    let folder_name = format!("Proton-{}", version_name).to_string();
+    let folder_name = format!("Proton-{}", version_name);
     if steam.is_installed(&folder_name) {
         fs::remove_dir_all(&format!("{}{}", steam.proton_path, &folder_name))?;
         success!("{} is removed", version_name);

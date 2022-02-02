@@ -39,3 +39,15 @@ impl From<&str> for Error {
         Self(err.into())
     }
 }
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self {
+        Self(err.to_string())
+    }
+}
+
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self {
+        Self(err.to_string())
+    }
+}

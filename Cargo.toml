@@ -3,7 +3,7 @@ name = "opengame"
 version = "0.0.1"
 edition = "2021"
 authors = ["Dragnansia"]
-description = "A simple program to install gaming dependencies on Linux computer"
+description = "A simple program to install gaming dependencies on Linux distro"
 
 [dependencies]
 async-trait = "0.1.52"

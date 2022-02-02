@@ -23,23 +23,15 @@ async fn main() -> Result<(), unv::Error> {
 
     match &args.commands {
         Commands::Proton(proton) => {
-            let steam = Steam::new();
-            if let Ok(steam) = steam {
-                proton.run(steam).await?;
-            } else {
-                error!("Steam initialisation error: {}", steam.err().unwrap())
-            }
+            let steam = Steam::new()?;
+            proton.run(steam).await?;
         }
-        Commands::Gaming(gaming) => match installer::find_installer() {
-            Ok(installer) => {
-                let root = installer::root_command();
-                let commands = gaming.commands(installer, root);
-                run_commands(&commands)?;
-            }
-            Err(err) => {
-                error!("{}", err.to_string());
-            }
-        },
+        Commands::Gaming(gaming) => {
+            let root = installer::root_command();
+            let installer = installer::find_installer()?;
+            let commands = gaming.commands(installer, root);
+            run_commands(&commands)?;
+        }
     }
 
     Ok(())

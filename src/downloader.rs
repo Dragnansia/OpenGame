@@ -1,4 +1,4 @@
-use crate::log::*;
+use crate::error::unv;
 use futures_util::StreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::{
@@ -15,26 +15,21 @@ fn basic_headers() -> HeaderMap<HeaderValue> {
     headers
 }
 
-pub async fn get(url: &str) -> Value {
+pub async fn get(url: &str) -> Result<Value, unv::Error> {
     let client = Client::new();
-    let response = client.get(url).headers(basic_headers()).send().await;
-    let data = response.unwrap().text().await.unwrap();
+    let response = client.get(url).headers(basic_headers()).send().await?;
+    let data = response.text().await.unwrap_or_default();
 
-    serde_json::from_str(&data).unwrap()
+    Ok(serde_json::from_str(&data)?)
 }
 
 // Todo: Add a Result for return for check if this download is ok
-pub async fn download_file(url: &str, path: &str) -> Result<String, String> {
-    let v = path.split("/").last().unwrap();
+pub async fn download_file(url: &str, path: &str) -> Result<(), unv::Error> {
+    let v = path.split("/").last().unwrap_or("download.tmp");
 
     let client = Client::new();
-    let response = client
-        .get(url)
-        .headers(basic_headers())
-        .send()
-        .await
-        .unwrap();
-    let size = response.content_length().unwrap();
+    let response = client.get(url).headers(basic_headers()).send().await?;
+    let size = response.content_length().unwrap_or_default();
 
     let pb = ProgressBar::new(size);
     pb.set_style(ProgressStyle::default_bar()
@@ -42,28 +37,21 @@ pub async fn download_file(url: &str, path: &str) -> Result<String, String> {
             .progress_chars("#>-"));
     pb.set_message(format!("-> Downloading {}", &v));
 
-    let mut file = match File::create(&path) {
-        Ok(fc) => fc,
-        Err(err) => {
-            error!("Failed to create file: {}", &path);
-            return Err(err.to_string());
-        }
-    };
+    let mut file = File::create(&path)?;
     let mut downloaded: u64 = 0;
     let mut stream = response.bytes_stream();
 
     while let Some(item) = stream.next().await {
         let chunk = item
             .or(Err(format!("Error while downloading file")))
-            .unwrap();
+            .unwrap_or_default();
 
         file.write(&chunk)
-            .or(Err(format!("Error while writing to file")))
-            .unwrap();
+            .or(Err(format!("Error while writing to file")))?;
 
         downloaded = min(downloaded + (chunk.len() as u64), size);
         pb.set_position(downloaded);
     }
 
-    Ok(v.to_string())
+    Ok(())
 }
