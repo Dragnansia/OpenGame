@@ -25,7 +25,7 @@ pub async fn get(url: &str) -> Result<Value, unv::Error> {
 
 // Todo: Add a Result for return for check if this download is ok
 pub async fn download_file(url: &str, path: &str) -> Result<(), unv::Error> {
-    let v = path.split("/").last().unwrap_or("download.tmp");
+    let v = path.split('/').last().unwrap_or("download.tmp");
 
     let client = Client::new();
     let response = client.get(url).headers(basic_headers()).send().await?;
@@ -42,12 +42,8 @@ pub async fn download_file(url: &str, path: &str) -> Result<(), unv::Error> {
     let mut stream = response.bytes_stream();
 
     while let Some(item) = stream.next().await {
-        let chunk = item
-            .or(Err(format!("Error while downloading file")))
-            .unwrap_or_default();
-
-        file.write(&chunk)
-            .or(Err(format!("Error while writing to file")))?;
+        let chunk = item?;
+        file.write_all(&chunk)?;
 
         downloaded = min(downloaded + (chunk.len() as u64), size);
         pb.set_position(downloaded);

@@ -11,6 +11,12 @@ tar = "0.4.38"
 serde_json = "1.0.78"
 futures-util = "0.3.19"
 indicatif = "0.16.2"
+log = "0.4.14"
+
+[dependencies.simple_logger]
+version = "2.1.0"
+default-features = false
+features = ["colors"]
 
 [dependencies.clap]
 version = "3.0.13"

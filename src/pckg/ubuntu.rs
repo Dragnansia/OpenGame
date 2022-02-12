@@ -1,4 +1,5 @@
-use crate::{dir, installer::Installer, log::*};
+use crate::{dir, installer::Installer};
+use log::error;
 use reqwest::blocking;
 use serde_json::Value;
 use std::process::Command;
@@ -6,7 +7,7 @@ use std::process::Command;
 pub struct Ubuntu;
 
 impl Installer for Ubuntu {
-    fn all(&self, root: &String) -> Vec<String> {
+    fn all(&self, root: &str) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -29,7 +30,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn gaming(&self, root: &String) -> Vec<String> {
+    fn gaming(&self, root: &str) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -50,7 +51,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn lutris(&self, root: &String) -> Vec<String> {
+    fn lutris(&self, root: &str) -> Vec<String> {
         vec![
             format!("{} apt install -y software-properties-common", root),
             format!("{} dpkg --add-architecture i386", root),
@@ -60,7 +61,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn heroic_launcher(&self, _root: &String) -> Vec<String> {
+    fn heroic_launcher(&self, _: &str) -> Vec<String> {
         match dir::user_dir() {
             Ok(ud) => vec![
                 "curl -o heroic.AppImage -LJO $(curl -s https://api.github.com/repos/Heroic-Games-Launcher/HeroicGamesLauncher/releases | grep browser_download_url | grep '[.]AppImage' | head -n 1 | cut -d '\"' -f 4)".to_string(),
@@ -76,7 +77,7 @@ impl Installer for Ubuntu {
         }
     }
 
-    fn overlay(&self, root: &String) -> Vec<String> {
+    fn overlay(&self, root: &str) -> Vec<String> {
         vec![
             format!("{} dpkg --add-architecture i386", root),
             format!("{} add-apt-repository -y ppa:flexiondotorg/mangohud", root),
@@ -85,7 +86,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn replay_sorcery(&self, root: &String) -> Vec<String> {
+    fn replay_sorcery(&self, root: &str) -> Vec<String> {
         let destination = format!(
             "{}ReplaySorcery",
             dir::format_tmp_dir("gaming", true).unwrap_or_default()
@@ -111,7 +112,7 @@ impl Installer for Ubuntu {
         ]
     }
 
-    fn mini_galaxy(&self, root: &String) -> Vec<String> {
+    fn mini_galaxy(&self, root: &str) -> Vec<String> {
         match dir::user_dir() {
             Ok(dir) => vec![
                 format!(

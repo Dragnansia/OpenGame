@@ -1,10 +1,10 @@
 use crate::{
     downloader,
     error::{dir, unv},
-    log::*,
     steam::Steam,
     timer,
 };
+use log::{debug, info, warn};
 use serde_json::Value;
 use std::{
     fs::{self, File},
@@ -21,7 +21,7 @@ pub fn remove_cache() -> Result<(), dir::Error> {
     if path.exists() {
         fs::remove_dir_all(path)?;
         fs::create_dir_all(&path)?;
-        success!("Cache folder for ProtonGE is removed");
+        info!("Cache folder for ProtonGE is removed");
     }
 
     Ok(())
@@ -40,13 +40,13 @@ pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), un
 
             if let Some(assets) = r["assets"].as_array() {
                 if assets.is_empty() {
-                    warning!("{} don't have any assets to download", tag_name);
+                    warn!("{} don't have any assets to download", tag_name);
                     break;
                 }
 
                 download_and_install_proton(assets, steam).await?;
 
-                success!(
+                info!(
                     "{} installation done ({} secs)",
                     tag_name,
                     timer::get_duration(&timer)
@@ -63,10 +63,10 @@ pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), un
 pub fn install_archive_version(path: &str, steam: &Steam) {
     let tar_gz = File::create(path).unwrap();
     let mut archive = Archive::new(tar_gz);
-    log!("Extract {}", &path);
+    debug!("Extract {}", &path);
     let timer = timer::current_time();
     archive.unpack(&steam.proton_path).unwrap();
-    success!(
+    info!(
         "{} unzip done ({} sec(s))",
         path,
         timer::get_duration(&timer)
@@ -83,7 +83,7 @@ async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Resu
             let url = asset["browser_download_url"].as_str().unwrap_or_default();
             let timer = timer::current_time();
             downloader::download_file(url, &final_path).await?;
-            success!(
+            info!(
                 "{} is download ({} sec(s))",
                 name,
                 timer::get_duration(&timer)
@@ -104,11 +104,11 @@ pub async fn update_protonge(steam: &Steam) -> Option<()> {
 
         let name_release = last_release["tag_name"].as_str()?;
         if steam.is_installed(&format!("Proton-{}", name_release)) {
-            warning!("The latest ProtonGE version is already installed")
+            warn!("The latest ProtonGE version is already installed")
         } else {
             let assets = last_release["assets"].as_array()?;
             download_and_install_proton(assets, steam).await.ok()?;
-            success!("Installation of {} is finished", name_release);
+            info!("Installation of {} is finished", name_release);
         }
     }
 
@@ -119,9 +119,9 @@ pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Erro
     let folder_name = format!("Proton-{}", version_name);
     if steam.is_installed(&folder_name) {
         fs::remove_dir_all(&format!("{}{}", steam.proton_path, &folder_name))?;
-        success!("{} is removed", version_name);
+        info!("{} is removed", version_name);
     } else {
-        warning!("{} is not installed", version_name);
+        warn!("{} is not installed", version_name);
     }
 
     Ok(())
@@ -131,11 +131,11 @@ pub fn list_version(steam: &Steam) {
     let proton_version = &steam.proton_version;
 
     if proton_version.is_empty() {
-        warning!("No Proton version installed");
+        warn!("No Proton version installed");
     } else {
-        log!("Proton version installed:");
+        debug!("Proton version installed:");
         for pe in proton_version {
-            log!("- {}", pe);
+            debug!("- {}", pe);
         }
     }
 }

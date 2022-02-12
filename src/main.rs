@@ -2,7 +2,6 @@ mod arguments;
 mod dir;
 mod downloader;
 mod error;
-mod log;
 mod pckg;
 mod proton;
 mod steam;
@@ -15,10 +14,12 @@ use pckg::{
     installer::{self},
     run_commands,
 };
+use simple_logger::SimpleLogger;
 use steam::Steam;
 
 #[tokio::main]
 async fn main() -> Result<(), unv::Error> {
+    SimpleLogger::new().init().unwrap();
     let args = Cli::parse();
 
     match &args.commands {

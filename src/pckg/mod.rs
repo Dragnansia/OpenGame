@@ -3,7 +3,8 @@ mod fedora;
 pub mod installer;
 mod ubuntu;
 
-use crate::{error::unv, log::*, timer};
+use crate::{error::unv, timer};
+use log::{error, info};
 use std::process::Command;
 
 /// Run commands provided by a vector of string
@@ -25,7 +26,7 @@ pub fn run_commands(cmds: &Vec<String>) -> Result<(), unv::Error> {
 
         let exit_status = Command::new(cmd).args(&args).status()?;
         if exit_status.success() {
-            success!(
+            info!(
                 "No error on last command ({} sec(s))",
                 timer::get_duration(&timer)
             );

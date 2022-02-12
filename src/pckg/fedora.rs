@@ -1,10 +1,11 @@
-use crate::{dir, installer::Installer, log::*};
+use crate::{dir, installer::Installer};
+use log::info;
 use std::process::Command;
 
 pub struct Fedora;
 
 impl Installer for Fedora {
-    fn all(&self, root: &String) -> Vec<String> {
+    fn all(&self, root: &str) -> Vec<String> {
         let fedora_version = find_version();
 
         if fedora_version < 33 {
@@ -25,7 +26,7 @@ impl Installer for Fedora {
         }
     }
 
-    fn gaming(&self, root: &String) -> Vec<String> {
+    fn gaming(&self, root: &str) -> Vec<String> {
         let fedora_version = find_version();
 
         if fedora_version < 33 {
@@ -45,11 +46,11 @@ impl Installer for Fedora {
         }
     }
 
-    fn lutris(&self, root: &String) -> Vec<String> {
+    fn lutris(&self, root: &str) -> Vec<String> {
         vec![format!("{} dnf install lutris -y", root)]
     }
 
-    fn heroic_launcher(&self, root: &String) -> Vec<String> {
+    fn heroic_launcher(&self, root: &str) -> Vec<String> {
         vec![
             format!("{} dnf copr enable atim/heroic-games-launcher -y", root),
             format!("{} dnf update -y", root),
@@ -57,11 +58,11 @@ impl Installer for Fedora {
         ]
     }
 
-    fn overlay(&self, root: &String) -> Vec<String> {
+    fn overlay(&self, root: &str) -> Vec<String> {
         vec![format!("{} dnf install goverlay -y", root)]
     }
 
-    fn replay_sorcery(&self, root: &String) -> Vec<String> {
+    fn replay_sorcery(&self, root: &str) -> Vec<String> {
         let destination = format!(
             "{}ReplaySorcery",
             dir::format_tmp_dir("gaming", true).unwrap_or_default()
@@ -79,21 +80,18 @@ impl Installer for Fedora {
         ]
     }
 
-    fn mini_galaxy(&self, root: &String) -> Vec<String> {
+    fn mini_galaxy(&self, root: &str) -> Vec<String> {
         vec![format!("{} dnf install minigalaxy", root)]
     }
 }
 
 fn find_version() -> i32 {
-    let res = match Command::new("lsb_release").arg("-rs").output() {
-        Ok(r) => String::from_utf8(r.stdout).unwrap_or_default(),
-        Err(err) => {
-            error!("{:?}", err);
-            "".to_string()
-        }
-    };
-
-    let r = &res[..res.len() - 1];
-    success!("Fedora version is {}", r);
-    r.parse::<i32>().unwrap_or_default()
+    if let Ok(res) = Command::new("lsb_release").arg("-rs").output() {
+        let res = String::from_utf8(res.stdout).unwrap_or_default();
+        let r = &res[..res.len() - 1];
+        info!("Fedora version is {}", r);
+        r.parse::<i32>().unwrap_or_default()
+    } else {
+        0
+    }
 }

@@ -1,4 +1,5 @@
-use crate::{error::dir, log::*};
+use crate::error::dir;
+use log::{error, info};
 use std::{fs, io, path::Path};
 
 pub struct Steam {
@@ -34,7 +35,7 @@ impl Steam {
         proton_path.push_str("root/compatibilitytools.d/");
         if !Path::new(&proton_path).exists() {
             match fs::create_dir_all(&proton_path).is_ok() {
-                true => success!("compatibilitytools.d directory is create at {}", steam_path),
+                true => info!("compatibilitytools.d directory is create at {}", steam_path),
                 false => {
                     error!(
                         "Can't create compatibilitytools.d directory on this directory {}",

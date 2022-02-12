@@ -1,4 +1,5 @@
-use crate::{error::dir, log::*};
+use crate::error::dir;
+use log::info;
 use std::{env::VarError, fs, path::Path};
 
 const TMP_DIR: &str = "/.cache/opengame/";
@@ -19,7 +20,7 @@ pub fn temp_dir() -> Result<String, dir::Error> {
 
     if !Path::new(&temp_dir).exists() {
         fs::create_dir_all(&temp_dir)?;
-        success!("Create temp directory");
+        info!("Create temp directory");
     }
 
     Ok(temp_dir)
