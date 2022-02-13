@@ -26,19 +26,16 @@ pub fn root_command() -> String {
 }
 
 pub fn find_installer() -> Result<&'static dyn Installer, Error> {
-    match Command::new("lsb_release").arg("-is").output() {
-        Ok(r) => {
-            let distro_utf8 = String::from_utf8(r.stdout).unwrap_or_default();
-            let distro_name = &distro_utf8[..distro_utf8.len() - 1];
-            info!("Current distro is {}", distro_name);
+    let output = Command::new("lsb_release").arg("-is").output()?;
 
-            match distro_name {
-                "Fedora" => Ok(&Fedora {}),
-                "Arch" => Ok(&Arch {}),
-                "Ubuntu" | "Elementary" => Ok(&Ubuntu {}),
-                _ => Err(Error::new(ErrorKind::Other, "Can't find distro package")),
-            }
-        }
-        Err(e) => Err(e),
+    let distro_utf8 = String::from_utf8(output.stdout).unwrap_or_default();
+    let distro_name = &distro_utf8[..distro_utf8.len() - 1];
+    info!("Current distro is {}", distro_name);
+
+    match distro_name {
+        "Fedora" => Ok(&Fedora {}),
+        "Arch" => Ok(&Arch {}),
+        "Ubuntu" | "Elementary" => Ok(&Ubuntu {}),
+        _ => Err(Error::new(ErrorKind::Other, "Can't find distro package")),
     }
 }
