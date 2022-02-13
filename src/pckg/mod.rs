@@ -21,10 +21,11 @@ use std::{
 /// run_commands(&commands);
 /// ```
 pub fn run_commands(cmds: &Vec<String>) -> Result<(), unv::Error> {
+    let mto = if cmds.len() > 1 { "s" } else { "" };
     // Before running commands, we need to get user agreement
-    info!("{} commands to run:", cmds.len());
+    info!("{} command{} to run:", cmds.len(), mto);
     cmds.iter().for_each(|cmd| println!("  - {}", cmd));
-    print!("Run commands ? [Y/n]: ");
+    print!("Run command{} ? [Y/n]: ", mto);
     // Need this to display print! macro
     io::stdout().flush()?;
 
@@ -43,9 +44,11 @@ pub fn run_commands(cmds: &Vec<String>) -> Result<(), unv::Error> {
 
         let exit_status = Command::new(cmd).args(&args).status()?;
         if exit_status.success() {
+            let time = timer::get_duration(&timer);
             info!(
-                "No error on last command ({} sec(s))",
-                timer::get_duration(&timer)
+                "No error with the command ({} sec{})",
+                time,
+                if time > 1 { "s" } else { "" }
             );
         } else {
             error!("Command error code: {:?}", exit_status.code());
