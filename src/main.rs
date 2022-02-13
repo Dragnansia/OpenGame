@@ -16,12 +16,11 @@ use pckg::{
     installer::{self},
     run_commands,
 };
-use simple_logger::SimpleLogger;
 use steam::Steam;
 
 #[tokio::main]
 async fn main() -> Result<(), unv::Error> {
-    SimpleLogger::new().init().unwrap();
+    simple_logger::init_with_level(log::Level::Info)?;
     let args = Cli::parse();
 
     match &args.commands {
