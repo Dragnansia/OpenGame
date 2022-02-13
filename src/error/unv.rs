@@ -1,3 +1,5 @@
+use log::SetLoggerError;
+
 use crate::error::dir;
 use std::{env::VarError, fmt::Display, io};
 
@@ -48,6 +50,12 @@ impl From<serde_json::Error> for Error {
 
 impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
+        Self(err.to_string())
+    }
+}
+
+impl From<SetLoggerError> for Error {
+    fn from(err: SetLoggerError) -> Self {
         Self(err.to_string())
     }
 }

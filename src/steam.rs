@@ -1,6 +1,6 @@
-use crate::error::dir;
+use crate::error::unv;
 use log::{error, info};
-use std::{fs, io, path::Path};
+use std::{fs, path::Path};
 
 pub struct Steam {
     pub path: String,
@@ -9,56 +9,58 @@ pub struct Steam {
 }
 
 impl Steam {
-    pub fn new() -> Result<Self, dir::Error> {
-        let st_path = Steam::fpath()?;
-        let proton_path = Steam::ppath(&st_path);
+    pub fn new() -> Result<Self, unv::Error> {
+        let path = Steam::fpath()?;
+        let proton_path = Steam::ppath(&path);
         Ok(Self {
-            path: st_path,
-            proton_path: proton_path.clone(),
-            proton_version: Steam::all_proton_version(&proton_path).unwrap_or_default(),
+            path,
+            proton_version: Steam::all_proton_version(&proton_path)?,
+            proton_path,
         })
     }
 
     // find steam path
-    fn fpath() -> Result<String, dir::Error> {
+    fn fpath() -> Result<String, unv::Error> {
         let steam_path = format!("{}{}", crate::dir::user_dir()?, "/.steam/");
 
-        match Path::new(&steam_path).exists() {
-            true => Ok(steam_path),
-            false => Err("Can't find any Steam directory".into()),
+        if Path::new(&steam_path).exists() {
+            Ok(steam_path)
+        } else {
+            Err("Can't find any Steam directory".into())
         }
     }
 
     // Parse steam path to get proton path
-    fn ppath(steam_path: &String) -> String {
-        let mut proton_path = steam_path.clone();
-        proton_path.push_str("root/compatibilitytools.d/");
-        if !Path::new(&proton_path).exists() {
-            match fs::create_dir_all(&proton_path).is_ok() {
-                true => info!("compatibilitytools.d directory is create at {}", steam_path),
-                false => {
-                    error!(
-                        "Can't create compatibilitytools.d directory on this directory {}",
-                        steam_path
-                    );
-                    error!("Try to open Steam for create directory");
-                }
-            }
+    fn ppath(steam_path: &str) -> String {
+        let proton_path = format!("{}root/compatibilitytools.d/", steam_path);
+
+        if Path::new(&proton_path).exists() {
+            return proton_path;
         }
 
-        proton_path.to_string()
+        if fs::create_dir_all(&proton_path).is_ok() {
+            info!("compatibilitytools.d directory is create at {}", steam_path);
+        } else {
+            error!(
+                "Can't create compatibilitytools.d directory on this directory {}",
+                steam_path
+            );
+            error!("Try to open Steam for create directory");
+        }
+
+        proton_path
     }
 
-    fn all_proton_version(proton_path: &String) -> io::Result<Vec<String>> {
+    fn all_proton_version(proton_path: &String) -> Result<Vec<String>, unv::Error> {
         let mut array: Vec<String> = Vec::new();
         for pe in fs::read_dir(proton_path)? {
             let pe = pe?;
             array.push(
                 pe.path()
                     .file_name()
-                    .unwrap_or_default()
+                    .ok_or("file name")?
                     .to_str()
-                    .unwrap_or_default()
+                    .ok_or("to str")?
                     .to_string(),
             );
         }

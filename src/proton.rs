@@ -29,29 +29,31 @@ pub fn remove_cache() -> Result<(), dir::Error> {
 
 pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), unv::Error> {
     let releases = downloader::get(GITHUB_API).await?;
-    let arr = releases.as_array().unwrap();
+    let arr = releases.as_array().ok_or("No releases array")?;
 
     for r in arr {
-        let tag_name = r["tag_name"].as_str().unwrap_or("Error");
+        let tag_name = r["tag_name"].as_str().ok_or("No tag_name")?;
         if tag_name.starts_with(version_name)
             && !steam.is_installed(&format!("Proton-{}", tag_name))
         {
             let timer = timer::current_time();
 
-            if let Some(assets) = r["assets"].as_array() {
-                if assets.is_empty() {
-                    warn!("{} don't have any assets to download", tag_name);
-                    break;
-                }
+            let assets = r["assets"]
+                .as_array()
+                .ok_or("Can't convert asset to array")?;
 
-                download_and_install_proton(assets, steam).await?;
-
-                info!(
-                    "{} installation done ({} secs)",
-                    tag_name,
-                    timer::get_duration(&timer)
-                );
+            if assets.is_empty() {
+                warn!("{} don't have any assets to download", tag_name);
+                break;
             }
+
+            download_and_install_proton(assets, steam).await?;
+
+            info!(
+                "{} installation done ({} secs)",
+                tag_name,
+                timer::get_duration(&timer)
+            );
 
             return Ok(());
         }
@@ -60,36 +62,45 @@ pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), un
     Err("No version found with this name".into())
 }
 
-pub fn install_archive_version(path: &str, steam: &Steam) {
-    let tar_gz = File::create(path).unwrap();
+pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Error> {
+    let tar_gz = File::create(path)?;
     let mut archive = Archive::new(tar_gz);
+
     debug!("Extract {}", &path);
     let timer = timer::current_time();
     archive.unpack(&steam.proton_path).unwrap();
+
     info!(
         "{} unzip done ({} sec(s))",
         path,
         timer::get_duration(&timer)
     );
+
+    Ok(())
 }
 
 async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Result<(), unv::Error> {
     for asset in assets {
-        let name = asset["name"].as_str().unwrap_or_default();
+        let name = asset["name"].as_str().ok_or("No name on asset")?;
         if name.ends_with(".tar.gz") {
             let path = crate::dir::format_tmp_dir("proton", true)?;
             let final_path = format!("{}{}", path, name);
 
-            let url = asset["browser_download_url"].as_str().unwrap_or_default();
+            let url = asset["browser_download_url"]
+                .as_str()
+                .ok_or("No browser_download_url")?;
+
             let timer = timer::current_time();
+
             downloader::download_file(url, &final_path).await?;
+
             info!(
                 "{} is download ({} sec(s))",
                 name,
                 timer::get_duration(&timer)
             );
 
-            install_archive_version(&final_path, steam);
+            install_archive_version(&final_path, steam)?;
             break;
         }
     }

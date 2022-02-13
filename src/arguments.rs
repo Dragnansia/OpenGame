@@ -57,7 +57,7 @@ impl Proton {
         }
 
         if let Some(p) = &self.archive {
-            proton::install_archive_version(p, &steam);
+            proton::install_archive_version(p, &steam)?;
         }
 
         if self.list {
