@@ -11,6 +11,7 @@ mod utils;
 use arguments::{Cli, Commands};
 use clap::StructOpt;
 use error::unv;
+use log::info;
 use pckg::{
     installer::{self},
     run_commands,
@@ -30,7 +31,11 @@ async fn main() -> Result<(), unv::Error> {
         }
         Commands::Gaming(gaming) => {
             let root = installer::root_command();
-            let installer = installer::find_installer()?;
+            info!("Root command => {}", root);
+
+            let (distro_name, installer) = installer::find_installer()?;
+            info!("Distro name => {}", distro_name);
+
             let commands = gaming.commands(installer, root);
             run_commands(&commands)?;
         }

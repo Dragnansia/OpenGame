@@ -1,8 +1,8 @@
-use crate::{dir, installer::Installer};
+use crate::{dir, installer::Installer, utils::os_release_data};
 use log::error;
 use reqwest::blocking;
 use serde_json::Value;
-use std::process::Command;
+use std::collections::VecDeque;
 
 pub struct Ubuntu;
 
@@ -16,7 +16,7 @@ impl Installer for Ubuntu {
             format!(
                 "{} add-apt-repository 'deb https://dl.winehq.org/wine-builds/ubuntu/ {} main' -y",
                 root,
-                release_code_name()
+                release_code_name().unwrap_or_default()
             ),
             format!("{} add-apt-repository -y ppa:lutris-team/lutris", root),
             format!("{} add-apt-repository -y multiverse", root),
@@ -39,7 +39,7 @@ impl Installer for Ubuntu {
             format!(
                 "{} add-apt-repository -y 'deb https://dl.winehq.org/wine-builds/ubuntu/ {} main'",
                 root,
-                release_code_name()
+                release_code_name().unwrap_or_default()
             ),
             format!("{} add-apt-repository -y multiverse", root),
             format!("{} apt update", root),
@@ -146,12 +146,10 @@ fn find_mini_galaxy_last_release() -> String {
     }
 }
 
-fn release_code_name() -> String {
-    match Command::new("lsb_release").arg("-cs").output() {
-        Ok(res) => String::from_utf8(res.stdout).unwrap_or_default(),
-        Err(err) => {
-            error!("{:?}", err);
-            String::new()
-        }
-    }
+fn release_code_name() -> Option<String> {
+    let (_, value) = os_release_data("VERSION").ok()?;
+    let mut value: VecDeque<&str> = value.split(' ').collect();
+    value.pop_front()?;
+
+    Some(String::from_iter(value))
 }

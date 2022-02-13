@@ -1,12 +1,10 @@
-use crate::{dir, installer::Installer};
-use log::info;
-use std::process::Command;
+use crate::{dir, installer::Installer, utils::os_release_data};
 
 pub struct Fedora;
 
 impl Installer for Fedora {
     fn all(&self, root: &str) -> Vec<String> {
-        let fedora_version = find_version();
+        let fedora_version = find_version().unwrap_or_default();
 
         if fedora_version < 33 {
             vec![
@@ -27,7 +25,7 @@ impl Installer for Fedora {
     }
 
     fn gaming(&self, root: &str) -> Vec<String> {
-        let fedora_version = find_version();
+        let fedora_version = find_version().unwrap_or_default();
 
         if fedora_version < 33 {
             vec![
@@ -85,13 +83,10 @@ impl Installer for Fedora {
     }
 }
 
-fn find_version() -> i32 {
-    if let Ok(res) = Command::new("lsb_release").arg("-rs").output() {
-        let res = String::from_utf8(res.stdout).unwrap_or_default();
-        let r = &res[..res.len() - 1];
-        info!("Fedora version is {}", r);
-        r.parse::<i32>().unwrap_or_default()
-    } else {
-        0
-    }
+fn find_version() -> Option<i32> {
+    let (_, value) = os_release_data("VERSION").ok()?;
+    let value: Vec<&str> = value.split(' ').collect();
+    let version = value[0].parse().ok()?;
+
+    Some(version)
 }

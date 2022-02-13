@@ -1,14 +1,9 @@
 use crate::{
     error::unv::Error,
     pckg::{arch::Arch, fedora::Fedora, ubuntu::Ubuntu},
-    utils::scan,
+    utils::os_release_data,
 };
-use log::info;
-use std::{
-    fs::File,
-    io::{BufRead, BufReader},
-    process::Command,
-};
+use std::process::Command;
 
 pub trait Installer {
     fn all(&self, root: &str) -> Vec<String>;
@@ -21,46 +16,27 @@ pub trait Installer {
 }
 
 pub fn root_command() -> String {
-    let res = ["sudo", "doas", "su"]
+    ["sudo", "doas", "su"]
         .iter()
         .find(|el| Command::new(el).output().is_ok())
         .unwrap_or(&"")
-        .to_string();
-    info!("Root command is {}", res);
-    res
+        .to_string()
 }
 
-pub fn find_installer() -> Result<&'static dyn Installer, Error> {
+pub fn find_installer() -> Result<(String, &'static dyn Installer), Error> {
     let distro_name = distro_name()?;
-    info!("Current distro is {}", distro_name);
+    let installer: &'static dyn Installer = match distro_name.as_str() {
+        "Fedora" => &Fedora,
+        "Arch" => &Arch,
+        "Ubuntu" | "Elementary" => &Ubuntu,
+        _ => return Err("Can't find distro package".into()),
+    };
 
-    match distro_name.as_str() {
-        "Fedora" => Ok(&Fedora {}),
-        "Arch" => Ok(&Arch {}),
-        "Ubuntu" | "Elementary" => Ok(&Ubuntu {}),
-        _ => Err("Can't find distro package".into()),
-    }
+    Ok((distro_name, installer))
 }
 
-fn distro_name() -> Result<String, Error> {
-    let file = File::open("/etc/os-release")?;
-
-    let reader = BufReader::new(file);
-    for (_, line) in reader.lines().enumerate() {
-        let line = line?;
-
-        let (name, value) = scan!(&line, "=", String, String);
-
-        let name = name.ok_or("No NAME value")?;
-        if name != "NAME" {
-            continue;
-        }
-
-        let value = value.ok_or("Value is Empty")?.replace("\"", "");
-        let value: Vec<&str> = value.split(' ').collect();
-
-        return Ok(value[0].into());
-    }
-
-    Err("No found NAME value".into())
+pub fn distro_name() -> Result<String, Error> {
+    let (_, value) = os_release_data("NAME")?;
+    let value: Vec<&str> = value.split(' ').collect();
+    Ok(value[0].into())
 }
