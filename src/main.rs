@@ -6,6 +6,7 @@ mod pckg;
 mod proton;
 mod steam;
 mod timer;
+mod utils;
 
 use arguments::{Cli, Commands};
 use clap::StructOpt;

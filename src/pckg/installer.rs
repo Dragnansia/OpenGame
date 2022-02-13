@@ -1,7 +1,12 @@
-use crate::pckg::{arch::Arch, fedora::Fedora, ubuntu::Ubuntu};
+use crate::{
+    error::unv::Error,
+    pckg::{arch::Arch, fedora::Fedora, ubuntu::Ubuntu},
+    utils::scan,
+};
 use log::info;
 use std::{
-    io::{Error, ErrorKind},
+    fs::File,
+    io::{BufRead, BufReader},
     process::Command,
 };
 
@@ -26,16 +31,34 @@ pub fn root_command() -> String {
 }
 
 pub fn find_installer() -> Result<&'static dyn Installer, Error> {
-    let output = Command::new("lsb_release").arg("-is").output()?;
-
-    let distro_utf8 = String::from_utf8(output.stdout).unwrap_or_default();
-    let distro_name = &distro_utf8[..distro_utf8.len() - 1];
+    let distro_name = distro_name()?;
     info!("Current distro is {}", distro_name);
 
-    match distro_name {
-        "Fedora" => Ok(&Fedora {}),
+    match distro_name.as_str() {
+        "Fedora Linux" => Ok(&Fedora {}),
         "Arch" => Ok(&Arch {}),
         "Ubuntu" | "Elementary" => Ok(&Ubuntu {}),
-        _ => Err(Error::new(ErrorKind::Other, "Can't find distro package")),
+        _ => Err("Can't find distro package".into()),
     }
+}
+
+fn distro_name() -> Result<String, Error> {
+    let file = File::open("/etc/os-release")?;
+
+    let reader = BufReader::new(file);
+    for (_, line) in reader.lines().enumerate() {
+        let line = line?;
+
+        let (name, value) = scan!(&line, "=", String, String);
+
+        let name = name.ok_or("No NAME value")?;
+        if name != "NAME" {
+            continue;
+        }
+
+        let value = value.ok_or("Value is Empty")?.replace("\"", "");
+        return Ok(value);
+    }
+
+    Err("No found NAME value".into())
 }
