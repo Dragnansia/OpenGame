@@ -35,7 +35,7 @@ pub fn find_installer() -> Result<&'static dyn Installer, Error> {
     info!("Current distro is {}", distro_name);
 
     match distro_name.as_str() {
-        "Fedora Linux" => Ok(&Fedora {}),
+        "Fedora" => Ok(&Fedora {}),
         "Arch" => Ok(&Arch {}),
         "Ubuntu" | "Elementary" => Ok(&Ubuntu {}),
         _ => Err("Can't find distro package".into()),
@@ -57,7 +57,9 @@ fn distro_name() -> Result<String, Error> {
         }
 
         let value = value.ok_or("Value is Empty")?.replace("\"", "");
-        return Ok(value);
+        let value: Vec<&str> = value.split(' ').collect();
+
+        return Ok(value[0].into());
     }
 
     Err("No found NAME value".into())
