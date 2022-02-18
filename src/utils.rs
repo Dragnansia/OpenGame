@@ -22,7 +22,7 @@ pub fn os_release_data(data: &str) -> Result<(String, String), error::unv::Error
 
         let (name, value) = scan!(line, "=", String, String);
 
-        let name = name.ok_or("No NAME value")?;
+        let name = name.ok_or(format!("No {} value", data))?;
         if name != data {
             continue;
         }

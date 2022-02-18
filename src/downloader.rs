@@ -23,7 +23,6 @@ pub async fn get(url: &str) -> Result<Value, unv::Error> {
     Ok(serde_json::from_str(&data)?)
 }
 
-// Todo: Add a Result for return for check if this download is ok
 pub async fn download_file(url: &str, path: &str) -> Result<(), unv::Error> {
     let v = path.split('/').last().unwrap_or("download.tmp");
 
@@ -34,8 +33,8 @@ pub async fn download_file(url: &str, path: &str) -> Result<(), unv::Error> {
     let pb = ProgressBar::new(size);
     pb.set_style(ProgressStyle::default_bar()
             .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-            .progress_chars("#>-"));
-    pb.set_message(format!("-> Downloading {}", &v));
+            .progress_chars("=- "));
+    pb.set_message(format!("-> {}", &v));
 
     let mut file = File::create(&path)?;
     let mut downloaded: u64 = 0;
