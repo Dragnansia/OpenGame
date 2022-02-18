@@ -53,7 +53,7 @@ impl Proton {
         }
 
         if self.update {
-            proton::update_protonge(&steam).await;
+            proton::update_protonge(&steam).await?;
         }
 
         if let Some(p) = &self.archive {

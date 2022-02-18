@@ -4,6 +4,7 @@ use crate::{
     steam::Steam,
     timer,
 };
+use flate2::read::GzDecoder;
 use log::{debug, info, warn};
 use serde_json::Value;
 use std::{
@@ -63,12 +64,13 @@ pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), un
 }
 
 pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Error> {
-    let tar_gz = File::create(path)?;
-    let mut archive = Archive::new(tar_gz);
+    let file = File::open(path)?;
+    let decompressed = GzDecoder::new(file);
+    let mut archive = Archive::new(decompressed);
 
-    debug!("Extract {}", &path);
+    info!("Extract {}", &path);
     let timer = timer::current_time();
-    archive.unpack(&steam.proton_path).unwrap();
+    archive.unpack(&steam.proton_path)?;
 
     info!(
         "{} unzip done ({} sec(s))",
@@ -108,22 +110,24 @@ async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Resu
     Ok(())
 }
 
-pub async fn update_protonge(steam: &Steam) -> Option<()> {
+pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
     let url = format!("{}{}", GITHUB_API, "?per_page=1");
-    if let Ok(res) = downloader::get(&url).await {
-        let last_release = &res.as_array()?[0];
+    let res = downloader::get(&url).await?;
+    let last_release = &res.as_array().ok_or("No array of ProtonGE instance")?[0];
 
-        let name_release = last_release["tag_name"].as_str()?;
-        if steam.is_installed(&format!("Proton-{}", name_release)) {
-            warn!("The latest ProtonGE version is already installed")
-        } else {
-            let assets = last_release["assets"].as_array()?;
-            download_and_install_proton(assets, steam).await.ok()?;
-            info!("Installation of {} is finished", name_release);
-        }
+    let name_release = last_release["tag_name"]
+        .as_str()
+        .ok_or("No tag_name on last release")?;
+
+    if steam.is_installed(&format!("Proton-{}", name_release)) {
+        warn!("The latest ProtonGE version is already installed")
+    } else {
+        let assets = last_release["assets"].as_array().ok_or("")?;
+        download_and_install_proton(assets, steam).await?;
+        info!("Installation of {} is finished", name_release);
     }
 
-    Some(())
+    Ok(())
 }
 
 pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {

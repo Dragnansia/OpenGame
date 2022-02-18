@@ -12,6 +12,7 @@ serde_json = "1.0.78"
 futures-util = "0.3.19"
 indicatif = "0.16.2"
 log = "0.4.14"
+flate2 = "1.0.22"
 
 [dependencies.simple_logger]
 version = "2.1.0"
