@@ -8,8 +8,8 @@ description = "A simple program to install gaming dependencies on Linux distro"
 [dependencies]
 async-trait = "0.1.52"
 tar = "0.4.38"
-serde_json = "1.0.78"
-futures-util = "0.3.19"
+serde_json = "1.0.79"
+futures-util = "0.3.21"
 indicatif = "0.16.2"
 log = "0.4.14"
 flate2 = "1.0.22"
@@ -20,7 +20,7 @@ default-features = false
 features = ["colors"]
 
 [dependencies.clap]
-version = "3.0.13"
+version = "3.1.0"
 features = ["derive"]
 
 [dependencies.reqwest]
@@ -29,5 +29,5 @@ default-features = false
 features = ["rustls-tls", "stream", "blocking"]
 
 [dependencies.tokio]
-version = "1.16.1"
+version = "1.17.0"
 features = ["full"]

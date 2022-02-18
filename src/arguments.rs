@@ -1,10 +1,9 @@
 use crate::{error::unv, pckg::installer::Installer, proton, steam::Steam};
-use clap::{AppSettings, Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
-#[clap(global_setting(AppSettings::PropagateVersion))]
-#[clap(global_setting(AppSettings::UseLongFormatForHelpSubcommand))]
+#[clap(propagate_version = true)]
 pub struct Cli {
     #[clap(subcommand)]
     pub commands: Commands,
