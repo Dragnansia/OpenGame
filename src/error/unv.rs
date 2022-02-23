@@ -59,3 +59,9 @@ impl From<SetLoggerError> for Error {
         Self(err.to_string())
     }
 }
+
+impl From<purs::error::Error> for Error {
+    fn from(error: purs::error::Error) -> Self {
+        Self(error.to_string())
+    }
+}
