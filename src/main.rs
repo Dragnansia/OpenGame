@@ -1,6 +1,5 @@
 mod arguments;
 mod dir;
-mod downloader;
 mod error;
 mod pckg;
 mod proton;

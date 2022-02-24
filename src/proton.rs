@@ -1,19 +1,54 @@
 use crate::{
-    downloader,
     error::{dir, unv},
     steam::Steam,
     timer,
 };
-use flate2::read::GzDecoder;
-use log::{debug, info, warn};
-use serde_json::Value;
+use indicatif::{ProgressBar, ProgressStyle};
+use log::{info, warn};
+use purs::{archive, downloader::Download};
 use std::{
-    fs::{self, File},
+    env::var,
+    fs::{self},
     path::Path,
 };
-use tar::Archive;
 
-const GITHUB_API: &str = "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases";
+#[derive(Debug)]
+pub struct ProtonDownload {
+    total_bytes: u64,
+    current_download: u64,
+    pb: ProgressBar,
+}
+
+impl ProtonDownload {
+    pub fn new(file_name: &str) -> Self {
+        let pb = ProgressBar::new(1);
+        pb.set_style(ProgressStyle::default_bar()
+            .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+            .progress_chars("=- "));
+        pb.set_message(format!("-> {}", file_name));
+
+        Self {
+            current_download: 0,
+            total_bytes: 0,
+            pb,
+        }
+    }
+}
+
+impl Download for ProtonDownload {
+    fn init(&mut self, size: u64) {
+        self.total_bytes = size;
+        self.pb.set_length(size);
+    }
+
+    fn update(&mut self, chunk: &[u8]) {
+        self.current_download = std::cmp::min(
+            self.current_download + (chunk.len() as u64),
+            self.total_bytes,
+        );
+        self.pb.set_position(self.current_download);
+    }
+}
 
 pub fn remove_cache() -> Result<(), dir::Error> {
     let po = crate::dir::format_tmp_dir("proton", false)?;
@@ -29,48 +64,48 @@ pub fn remove_cache() -> Result<(), dir::Error> {
 }
 
 pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), unv::Error> {
-    let releases = downloader::get(GITHUB_API).await?;
-    let arr = releases.as_array().ok_or("No releases array")?;
+    let versions = purs::api::version_list().await?;
+    let version = versions
+        .iter()
+        .find(|version| version.tag_name.starts_with(version_name))
+        .ok_or("No version found")?;
 
-    for r in arr {
-        let tag_name = r["tag_name"].as_str().ok_or("No tag_name")?;
-        if tag_name.starts_with(version_name)
-            && !steam.is_installed(&format!("Proton-{}", tag_name))
-        {
-            let timer = timer::current_time();
-
-            let assets = r["assets"]
-                .as_array()
-                .ok_or("Can't convert asset to array")?;
-
-            if assets.is_empty() {
-                warn!("{} don't have any assets to download", tag_name);
-                break;
-            }
-
-            download_and_install_proton(assets, steam).await?;
-
-            info!(
-                "{} installation done ({} secs)",
-                tag_name,
-                timer::get_duration(&timer)
-            );
-
-            return Ok(());
-        }
+    if steam.is_installed(&format!("Proton-{}", version.tag_name)) {
+        warn!("{} ProtonGE version is already installed", version.tag_name);
+        return Ok(());
     }
 
-    Err("No version found with this name".into())
+    let asset = version
+        .assets
+        .iter()
+        .find(|asset| asset.name.ends_with("tar.gz"))
+        .ok_or("No tar.gz archive on assets")?;
+
+    let timer = timer::current_time();
+    let cache = purs::cache::path(&var("CARGO_PKG_NAME")?).ok_or("")?;
+    let archive = format!("{}/{}", cache, asset.name);
+
+    purs::downloader::file(
+        &asset.browser_download_url,
+        &archive,
+        &mut ProtonDownload::new(&asset.name),
+    )
+    .await?;
+
+    install_archive_version(&archive, steam)?;
+
+    info!(
+        "{} installation done ({} secs)",
+        version.tag_name,
+        timer::get_duration(&timer)
+    );
+
+    Ok(())
 }
 
 pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Error> {
-    let file = File::open(path)?;
-    let decompressed = GzDecoder::new(file);
-    let mut archive = Archive::new(decompressed);
-
-    info!("Extract {}", &path);
     let timer = timer::current_time();
-    archive.unpack(&steam.proton_path)?;
+    archive::install(path, &steam.proton_path)?;
 
     info!(
         "{} unzip done ({} sec(s))",
@@ -81,51 +116,41 @@ pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Err
     Ok(())
 }
 
-async fn download_and_install_proton(assets: &Vec<Value>, steam: &Steam) -> Result<(), unv::Error> {
-    for asset in assets {
-        let name = asset["name"].as_str().ok_or("No name on asset")?;
-        if name.ends_with(".tar.gz") {
-            let path = crate::dir::format_tmp_dir("proton", true)?;
-            let final_path = format!("{}{}", path, name);
-
-            let url = asset["browser_download_url"]
-                .as_str()
-                .ok_or("No browser_download_url")?;
-
-            let timer = timer::current_time();
-
-            downloader::download_file(url, &final_path).await?;
-
-            info!(
-                "{} is download ({} sec(s))",
-                name,
-                timer::get_duration(&timer)
-            );
-
-            install_archive_version(&final_path, steam)?;
-            break;
-        }
-    }
-
-    Ok(())
-}
-
 pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
-    let url = format!("{}{}", GITHUB_API, "?per_page=1");
-    let res = downloader::get(&url).await?;
-    let last_release = &res.as_array().ok_or("No array of ProtonGE instance")?[0];
+    let versions = purs::api::version_list().await?;
+    let last_version = versions.first().ok_or("Version array is empty")?;
 
-    let name_release = last_release["tag_name"]
-        .as_str()
-        .ok_or("No tag_name on last release")?;
-
-    if steam.is_installed(&format!("Proton-{}", name_release)) {
-        warn!("The latest ProtonGE version is already installed")
-    } else {
-        let assets = last_release["assets"].as_array().ok_or("")?;
-        download_and_install_proton(assets, steam).await?;
-        info!("Installation of {} is finished", name_release);
+    if steam.is_installed(&format!("Proton-{}", last_version.tag_name)) {
+        warn!("The latest ProtonGE version is already installed");
+        return Ok(());
     }
+
+    let timer = timer::current_time();
+
+    let asset = last_version
+        .assets
+        .iter()
+        .find(|asset| asset.name.ends_with("tar.gz"))
+        .ok_or("Last ProtonGE version no found")?;
+
+    let cache = purs::cache::path(&var("CARGO_PKG_NAME")?).ok_or("")?;
+    let archive_path = format!("{}{}", cache, asset.name);
+
+    purs::downloader::file(
+        &asset.browser_download_url,
+        &archive_path,
+        &mut ProtonDownload::new(&asset.name),
+    )
+    .await?;
+
+    install_archive_version(&archive_path, steam)?;
+    info!("Installation of {} is finished", asset.name);
+
+    info!(
+        "{} installation done ({} secs)",
+        last_version.tag_name,
+        timer::get_duration(&timer)
+    );
 
     Ok(())
 }
@@ -148,9 +173,9 @@ pub fn list_version(steam: &Steam) {
     if proton_version.is_empty() {
         warn!("No Proton version installed");
     } else {
-        debug!("Proton version installed:");
+        info!("Proton version installed:");
         for pe in proton_version {
-            debug!("- {}", pe);
+            info!("- {}", pe);
         }
     }
 }

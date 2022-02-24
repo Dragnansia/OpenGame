@@ -7,12 +7,10 @@ description = "A simple program to install gaming dependencies on Linux distro"
 
 [dependencies]
 async-trait = "0.1.52"
-tar = "0.4.38"
 serde_json = "1.0.79"
 futures-util = "0.3.21"
 indicatif = "0.16.2"
 log = "0.4.14"
-flate2 = "1.0.22"
 
 [dependencies.simple_logger]
 version = "2.1.0"
@@ -31,3 +29,7 @@ features = ["rustls-tls", "stream", "blocking"]
 [dependencies.tokio]
 version = "1.17.0"
 features = ["full"]
+
+[dependencies.purs]
+git = "https://github.com/Dragnansia/purs"
+branch = "main"
