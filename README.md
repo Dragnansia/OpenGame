@@ -1,6 +1,6 @@
 OpenGame
 ======
-OpenGame (OG) is a gaming dependencies and ProtonGE (like protonup) installer for multi linux distro
+OpenGame (OG) is a gaming dependencies library in rust
 
 <details>
 <summary>Distributions</summary>
