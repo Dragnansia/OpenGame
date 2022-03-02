@@ -60,8 +60,8 @@ impl From<SetLoggerError> for Error {
     }
 }
 
-impl From<purs::error::Error> for Error {
-    fn from(error: purs::error::Error) -> Self {
+impl From<lamodin::error::Error> for Error {
+    fn from(error: lamodin::error::Error) -> Self {
         Self(error.to_string())
     }
 }

@@ -30,6 +30,6 @@ features = ["rustls-tls", "stream", "blocking"]
 version = "1.17.0"
 features = ["full"]
 
-[dependencies.purs]
-git = "https://github.com/Dragnansia/purs"
+[dependencies.lamodin]
+git = "https://github.com/Dragnansia/lamodin"
 branch = "main"

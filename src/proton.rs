@@ -1,11 +1,10 @@
 use crate::{
     error::{dir, unv},
-    steam::Steam,
     timer,
 };
 use indicatif::{ProgressBar, ProgressStyle};
+use lamodin::{archive, downloader::Download, launcher::steam::Steam, modifier::Modifier};
 use log::{info, warn};
-use purs::{archive, downloader::Download};
 use std::{
     env::var,
     fs::{self},
@@ -63,49 +62,9 @@ pub fn remove_cache() -> Result<(), dir::Error> {
     Ok(())
 }
 
-pub async fn install_version(version_name: &str, steam: &Steam) -> Result<(), unv::Error> {
-    let versions = purs::api::version_list().await?;
-    let version = versions
-        .iter()
-        .find(|version| version.tag_name.starts_with(version_name))
-        .ok_or("No version found")?;
-
-    if steam.is_installed(&format!("Proton-{}", version.tag_name)) {
-        warn!("{} ProtonGE version is already installed", version.tag_name);
-        return Ok(());
-    }
-
-    let asset = version
-        .assets
-        .iter()
-        .find(|asset| asset.name.ends_with("tar.gz"))
-        .ok_or("No tar.gz archive on assets")?;
-
-    let timer = timer::current_time();
-    let cache = purs::cache::path(&var("CARGO_PKG_NAME")?).ok_or("")?;
-    let archive = format!("{}/{}", cache, asset.name);
-
-    purs::downloader::file(
-        &asset.browser_download_url,
-        &archive,
-        &mut ProtonDownload::new(&asset.name),
-    )
-    .await?;
-
-    install_archive_version(&archive, steam)?;
-
-    info!(
-        "{} installation done ({} secs)",
-        version.tag_name,
-        timer::get_duration(&timer)
-    );
-
-    Ok(())
-}
-
 pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Error> {
     let timer = timer::current_time();
-    archive::install(path, &steam.proton_path)?;
+    archive::install(path, &steam.modifier_path)?;
 
     info!(
         "{} unzip done ({} sec(s))",
@@ -117,7 +76,7 @@ pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Err
 }
 
 pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
-    let versions = purs::api::version_list().await?;
+    let versions = steam.versions().await?;
     let last_version = versions.first().ok_or("Version array is empty")?;
 
     if steam.is_installed(&format!("Proton-{}", last_version.tag_name)) {
@@ -133,10 +92,10 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
         .find(|asset| asset.name.ends_with("tar.gz"))
         .ok_or("Last ProtonGE version no found")?;
 
-    let cache = purs::cache::path(&var("CARGO_PKG_NAME")?).ok_or("")?;
+    let cache = lamodin::cache::path(&var("CARGO_PKG_NAME")?).ok_or("")?;
     let archive_path = format!("{}{}", cache, asset.name);
 
-    purs::downloader::file(
+    lamodin::downloader::file(
         &asset.browser_download_url,
         &archive_path,
         &mut ProtonDownload::new(&asset.name),
@@ -158,7 +117,7 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
 pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
     let folder_name = format!("Proton-{}", version_name);
     if steam.is_installed(&folder_name) {
-        fs::remove_dir_all(&format!("{}{}", steam.proton_path, &folder_name))?;
+        fs::remove_dir_all(&format!("{}{}", steam.modifier_path, &folder_name))?;
         info!("{} is removed", version_name);
     } else {
         warn!("{} is not installed", version_name);
@@ -168,7 +127,7 @@ pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Erro
 }
 
 pub fn list_version(steam: &Steam) {
-    let proton_version = &steam.proton_version;
+    let proton_version = &steam.modifiers;
 
     if proton_version.is_empty() {
         warn!("No Proton version installed");

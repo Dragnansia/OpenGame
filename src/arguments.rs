@@ -1,5 +1,10 @@
-use crate::{error::unv, pckg::installer::Installer, proton, steam::Steam};
+use crate::{
+    error::unv,
+    pckg::installer::Installer,
+    proton::{self, ProtonDownload},
+};
 use clap::{Args, Parser, Subcommand};
+use lamodin::{launcher::steam::Steam, modifier::Modifier};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -48,7 +53,21 @@ pub struct Proton {
 impl Proton {
     pub async fn run(&self, steam: Steam) -> Result<(), unv::Error> {
         if let Some(v) = &self.install {
-            proton::install_version(v, &steam).await?;
+            let versions = steam.versions().await?;
+            let release = versions
+                .iter()
+                .find(|pe| pe.tag_name.starts_with(v))
+                .ok_or("err")?;
+
+            let asset = release
+                .assets
+                .iter()
+                .find(|a| a.name.ends_with("tar.gz"))
+                .ok_or("")?;
+
+            steam
+                .install(asset, ProtonDownload::new(&release.name))
+                .await?;
         }
 
         if self.update {
