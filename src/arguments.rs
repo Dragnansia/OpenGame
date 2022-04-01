@@ -4,7 +4,7 @@ use crate::{
     proton::{self, ProtonDownload},
 };
 use clap::{Args, Parser, Subcommand};
-use lamodin::{launcher::steam::Steam, modifier::Modifier};
+use lamodin::{launcher::steam::Steam, modifier::ModifierImpl};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -53,7 +53,7 @@ pub struct Proton {
 impl Proton {
     pub async fn run(&self, steam: Steam) -> Result<(), unv::Error> {
         if let Some(v) = &self.install {
-            let versions = steam.versions().await?;
+            let versions = Steam::versions().await?;
             let release = versions
                 .iter()
                 .find(|pe| pe.tag_name.starts_with(v))

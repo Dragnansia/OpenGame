@@ -1,15 +1,17 @@
 use crate::{
+    dir::format_tmp_dir,
     error::{dir, unv},
     timer,
 };
 use indicatif::{ProgressBar, ProgressStyle};
-use lamodin::{archive, downloader::Download, launcher::steam::Steam, modifier::Modifier};
-use log::{info, warn};
-use std::{
-    env::var,
-    fs::{self},
-    path::Path,
+use lamodin::{
+    archive,
+    downloader::Download,
+    launcher::{steam::Steam, Launcher},
+    modifier::ModifierImpl,
 };
+use log::{info, warn};
+use std::{env::var, fs, path::Path};
 
 #[derive(Debug)]
 pub struct ProtonDownload {
@@ -50,7 +52,7 @@ impl Download for ProtonDownload {
 }
 
 pub fn remove_cache() -> Result<(), dir::Error> {
-    let po = crate::dir::format_tmp_dir("proton", false)?;
+    let po = format_tmp_dir("proton", false)?;
     let path = Path::new(&po);
 
     if path.exists() {
@@ -76,10 +78,10 @@ pub fn install_archive_version(path: &str, steam: &Steam) -> Result<(), unv::Err
 }
 
 pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
-    let versions = steam.versions().await?;
+    let versions = Steam::versions().await?;
     let last_version = versions.first().ok_or("Version array is empty")?;
 
-    if steam.is_installed(&format!("Proton-{}", last_version.tag_name)) {
+    if steam.containt_version(&format!("Proton-{}", last_version.tag_name)) {
         warn!("The latest ProtonGE version is already installed");
         return Ok(());
     }
@@ -116,7 +118,7 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
 
 pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
     let folder_name = format!("Proton-{}", version_name);
-    if steam.is_installed(&folder_name) {
+    if steam.containt_version(&folder_name) {
         fs::remove_dir_all(&format!("{}{}", steam.modifier_path, &folder_name))?;
         info!("{} is removed", version_name);
     } else {
@@ -134,7 +136,7 @@ pub fn list_version(steam: &Steam) {
     } else {
         info!("Proton version installed:");
         for pe in proton_version {
-            info!("- {}", pe);
+            info!("- {}", pe.name);
         }
     }
 }

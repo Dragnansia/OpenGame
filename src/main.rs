@@ -11,10 +11,7 @@ use clap::StructOpt;
 use error::unv;
 use lamodin::launcher::steam::Steam;
 use log::info;
-use pckg::{
-    installer::{self},
-    run_commands,
-};
+use pckg::{installer, run_commands};
 
 #[tokio::main]
 async fn main() -> Result<(), unv::Error> {
