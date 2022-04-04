@@ -15,9 +15,9 @@ use pckg::{installer, run_commands};
 
 #[tokio::main]
 async fn main() -> Result<(), unv::Error> {
-    simple_logger::init_with_level(log::Level::Info)?;
-    let args = Cli::parse();
+    color_logger::init()?;
 
+    let args = Cli::parse();
     match &args.commands {
         Commands::Proton(proton) => {
             let steam = Steam::new()?;
