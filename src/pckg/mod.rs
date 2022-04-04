@@ -4,7 +4,7 @@ pub mod installer;
 mod ubuntu;
 
 use crate::{error::unv, timer};
-use log::{error, info};
+use log::{error, info, warn};
 use std::{
     io::{self, Write},
     process::Command,
@@ -21,6 +21,11 @@ use std::{
 /// run_commands(&commands);
 /// ```
 pub fn run_commands(cmds: &Vec<String>) -> Result<(), unv::Error> {
+    if cmds.is_empty() {
+        warn!("No command to run");
+        return Ok(());
+    }
+
     let mto = if cmds.len() > 1 { "s" } else { "" };
     // Before running commands, we need to get user agreement
     info!("{} command{} to run:", cmds.len(), mto);
