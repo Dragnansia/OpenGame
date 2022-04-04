@@ -5,6 +5,7 @@ use crate::{
 };
 use std::process::Command;
 
+/// Function to install group dependencies
 pub trait Installer {
     fn all(&self, root: &str) -> Vec<String>;
     fn gaming(&self, root: &str) -> Vec<String>;
@@ -25,7 +26,7 @@ pub fn root_command() -> String {
 
 pub fn find_installer() -> Result<(String, &'static dyn Installer), Error> {
     let distro_name = distro_name()?;
-    let installer: &'static dyn Installer = match distro_name.as_str() {
+    let installer: &dyn Installer = match distro_name.as_str() {
         "Fedora" => &Fedora,
         "Arch" => &Arch,
         "Ubuntu" | "Elementary" => &Ubuntu,

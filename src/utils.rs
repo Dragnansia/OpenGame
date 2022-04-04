@@ -10,16 +10,15 @@ macro_rules! scan {
         ($(iter.next().and_then(|word| word.parse::<$x>().ok()),)*)
     }}
 }
-
 pub(crate) use scan;
 
+/// Return data information from `/etc/os-release` file
 pub fn os_release_data(data: &str) -> Result<(String, String), error::unv::Error> {
     let file = File::open("/etc/os-release")?;
 
     let reader = BufReader::new(file);
-    for (_, line) in reader.lines().enumerate() {
+    for line in reader.lines() {
         let line = line?;
-
         let (name, value) = scan!(line, "=", String, String);
 
         let name = name.ok_or(format!("No {} value", data))?;
