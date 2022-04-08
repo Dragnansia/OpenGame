@@ -1,6 +1,6 @@
 use crate::installer::Installer;
 use log::error;
-use std::process::Command;
+use std::path::Path;
 
 pub struct Arch;
 
@@ -18,7 +18,7 @@ impl Installer for Arch {
     }
 
     fn lutris(&self, root: &str) -> Vec<String> {
-        vec![format!("{} pacman -Syu lutris", root)]
+        vec![format!("{} pacman -Syu lutris --noconfirm", root)]
     }
 
     fn heroic_launcher(&self, _: &str) -> Vec<String> {
@@ -72,7 +72,10 @@ impl Installer for Arch {
 fn get_aur_package_manager() -> String {
     ["yay", "pamac", "paru"]
         .iter()
-        .find(|el| Command::new("command").arg("-v").arg(el).output().is_ok())
+        .find(|el| {
+            let path = format!("/usr/bin/{}", el);
+            Path::new(&path).exists()
+        })
         .unwrap_or(&"")
         .to_string()
 }

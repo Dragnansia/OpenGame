@@ -28,9 +28,9 @@ pub fn find_installer() -> Result<(String, &'static dyn Installer), Error> {
     let distro_name = distro_name()?;
     let installer: &dyn Installer = match distro_name.as_str() {
         "Fedora" => &Fedora,
-        "Arch" => &Arch,
+        "Arch" | "EndeavourOS" => &Arch,
         "Ubuntu" | "Elementary" => &Ubuntu,
-        _ => return Err("Can't find distro package".into()),
+        _ => return Err(format!("Can't find distro package for {}", distro_name).into()),
     };
 
     Ok((distro_name, installer))

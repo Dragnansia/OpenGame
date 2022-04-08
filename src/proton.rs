@@ -2,6 +2,7 @@ use crate::{
     dir::format_tmp_dir,
     error::{dir, unv},
     timer,
+    utils::user_validation,
 };
 use indicatif::{ProgressBar, ProgressStyle};
 use lamodin::{
@@ -81,7 +82,7 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
     let versions = Steam::versions().await?;
     let last_version = versions.first().ok_or("Version array is empty")?;
 
-    if steam.containt_version(&format!("Proton-{}", last_version.tag_name)) {
+    if steam.containt_version(&last_version.tag_name).is_some() {
         warn!("The latest ProtonGE version is already installed");
         return Ok(());
     }
@@ -105,7 +106,6 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
     .await?;
 
     install_archive_version(&archive_path, steam)?;
-    info!("Installation of {} is finished", asset.name);
 
     info!(
         "{} installation done ({} secs)",
@@ -117,12 +117,20 @@ pub async fn update_protonge(steam: &Steam) -> Result<(), unv::Error> {
 }
 
 pub fn remove_version(version_name: &str, steam: &Steam) -> Result<(), dir::Error> {
-    let folder_name = format!("Proton-{}", version_name);
-    if steam.containt_version(&folder_name) {
-        fs::remove_dir_all(&format!("{}{}", steam.modifier_path, &folder_name))?;
+    if let Some(version) = steam.containt_version(version_name) {
+        info!("Do you really want to remove {} ?", version.name);
+
+        let msg = format!("Do you wan't to remove {} version ? [Y/n]: ", version.name);
+        if user_validation(&msg, |r| {
+            r == "n" || r == "N" || r != "y" && r != "Y" && r != ""
+        }) {
+            return Ok(());
+        }
+
+        fs::remove_dir_all(&format!("{}{}", steam.modifier_path, version.path))?;
         info!("{} is removed", version_name);
     } else {
-        warn!("{} is not installed", version_name);
+        warn!("{} is not installed or not found", version_name);
     }
 
     Ok(())

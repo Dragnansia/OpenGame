@@ -56,7 +56,7 @@ impl Proton {
             let versions = Steam::versions().await?;
             let release = versions
                 .iter()
-                .find(|pe| pe.tag_name.starts_with(v))
+                .find(|pe| pe.tag_name.contains(v))
                 .ok_or("err")?;
 
             let asset = release

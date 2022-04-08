@@ -3,12 +3,9 @@ mod fedora;
 pub mod installer;
 mod ubuntu;
 
-use crate::{error::unv, timer};
+use crate::{error::unv, timer, utils::user_validation};
 use log::{error, info, warn};
-use std::{
-    io::{self, Write},
-    process::Command,
-};
+use std::process::Command;
 
 /// Run commands provided by a vector of string
 ///
@@ -30,15 +27,11 @@ pub fn run_commands(cmds: &Vec<String>) -> Result<(), unv::Error> {
     // Before running commands, we need to get user agreement
     info!("{} command{} to run:", cmds.len(), mto);
     cmds.iter().for_each(|cmd| println!("  - {}", cmd));
-    print!("Run command{} ? [Y/n]: ", mto);
-    // Need this to display print! macro
-    io::stdout().flush()?;
 
-    let mut run_commands = String::new();
-    io::stdin().read_line(&mut run_commands)?;
-
-    let rcmd = run_commands.get(..1).ok_or("")?;
-    if rcmd == "n" || rcmd == "N" || rcmd != "y" && rcmd != "Y" && rcmd != "\n" {
+    let qst = format!("Run command{} ? [Y/n]: ", mto);
+    if user_validation(&qst, |r| {
+        r == "n" || r == "N" || r != "y" && r != "Y" && r != ""
+    }) {
         return Ok(());
     }
 

@@ -1,7 +1,7 @@
 use crate::error;
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{self, BufRead, BufReader, Write},
 };
 
 macro_rules! scan {
@@ -31,4 +31,17 @@ pub fn os_release_data(data: &str) -> Result<(String, String), error::unv::Error
     }
 
     Err(format!("No found {} value", data).into())
+}
+
+pub fn user_validation(display: &str, response: fn(&str) -> bool) -> bool {
+    print!("{}", display);
+    io::stdout().flush().unwrap();
+
+    let mut res = String::new();
+    io::stdin().read_line(&mut res).unwrap_or_default();
+
+    // Remove \n character at the end
+    res.pop().unwrap_or_default();
+
+    response(&res)
 }
