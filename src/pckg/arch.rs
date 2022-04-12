@@ -53,7 +53,10 @@ impl Installer for Arch {
             error!("No AUR package manager found for this Arch distro");
             vec![]
         } else {
-            vec![format!("{} replay-sorcery -y --needed --noconfirm", aur)]
+            vec![
+                format!("{} replay-sorcery -y --needed --noconfirm", aur),
+                "systemctl --user enable --now replay-sorcery".into(),
+            ]
         }
     }
 

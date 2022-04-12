@@ -15,7 +15,7 @@ use pckg::{installer, run_commands};
 
 #[tokio::main]
 async fn main() -> Result<(), unv::Error> {
-    color_logger::init(None)?;
+    color_logger::ColorLogger::new();
 
     let args = Cli::parse();
     match &args.commands {
