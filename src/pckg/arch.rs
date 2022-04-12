@@ -55,6 +55,7 @@ impl Installer for Arch {
         } else {
             vec![
                 format!("{} replay-sorcery -y --needed --noconfirm", aur),
+                "cp /usr/etc/replay-sorcery.conf ~/.config/replay-sorcery.conf".into(),
                 "systemctl --user enable --now replay-sorcery".into(),
             ]
         }
