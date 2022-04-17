@@ -2,13 +2,14 @@ OpenGame
 ======
 OpenGame (OG) is a gaming dependencies library in rust
 
+<!--
 ## Installation
-Install curl on your system to use installation command.  
 Use this only when a realease is create.
 
 ```shell
 curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | sh
 ```
+-->
 
 ## Distro
 <details>
@@ -16,9 +17,10 @@ curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | 
 
 + [x] Fedora
 + [x] Ubuntu
++ [ ] PopOs
 + [x] ElementaryOS
-+ [ ] Arch
-+ [ ] EndeavourOS
++ [x] Arch
++ [x] EndeavourOS
 </details>
 
 ## Remove
@@ -26,6 +28,11 @@ curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | 
 rm ~/bin/opengame
 ```
 
+## Todo
+- [ ] Rewrite some part to install proton or wine for specific launcher
+- [ ] Update log to be saved on file ?
+- [ ] Used a sqlite3 file to saved command to run ?
+- [ ] Check package installed before installation ?
+
 ## Other projects
 + [LibreGaming](https://github.com/Ahmed-Al-Balochi/LibreGaming)
-

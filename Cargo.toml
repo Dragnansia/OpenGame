@@ -6,7 +6,7 @@ authors = ["Dragnansia"]
 description = "A simple program to install gaming dependencies on Linux distro"
 
 [dependencies]
-async-trait = "0.1.52"
+async-trait = "0.1.53"
 serde_json = "1.0.79"
 futures-util = "0.3.21"
 indicatif = "0.16.2"
@@ -17,11 +17,11 @@ git = "https://github.com/Dragnansia/color-logger.git"
 branch = "main"
 
 [dependencies.clap]
-version = "3.1.0"
+version = "3.1.9"
 features = ["derive"]
 
 [dependencies.reqwest]
-version = "0.11.9"
+version = "0.11.10"
 default-features = false
 features = ["rustls-tls", "stream", "blocking"]
 
