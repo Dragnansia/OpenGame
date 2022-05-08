@@ -4,7 +4,7 @@ OpenGame (OG) is a gaming dependencies library in rust
 
 <!--
 ## Installation
-Use this only when a realease is create.
+Use this only when a release is created.
 
 ```shell
 curl -L https://raw.githubusercontent.com/Dragnansia/OpenGame/main/install.sh | sh
