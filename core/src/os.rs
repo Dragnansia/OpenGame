@@ -8,7 +8,7 @@ use std::{
 
 /// Return data information from `/etc/os-release` by name of the data
 /// and if not found return error
-pub fn release_data(name_data: &str) -> Result<String, Error> {
+pub fn release_data(data_name: &str) -> Result<String, Error> {
     let file = File::open("/etc/os-release")?;
 
     let reader = BufReader::new(file);
@@ -17,7 +17,7 @@ pub fn release_data(name_data: &str) -> Result<String, Error> {
         let (name, value) = scan!(line, "=", String, String);
 
         let name = name.unwrap_or_default();
-        if name != name_data {
+        if name != data_name {
             continue;
         }
 
