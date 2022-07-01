@@ -1,14 +1,14 @@
 //! All functions used for os data and interaction
 
-use crate::utils::scan;
+use crate::{error, utils::scan};
 use std::{
     fs::File,
-    io::{BufRead, BufReader, Error, ErrorKind},
+    io::{BufRead, BufReader},
 };
 
 /// Return data information from `/etc/os-release` by name of the data
 /// and if not found return error
-pub fn release_data(data_name: &str) -> Result<String, Error> {
+pub fn release_data(data_name: &str) -> Result<String, error::Error> {
     let file = File::open("/etc/os-release")?;
 
     let reader = BufReader::new(file);
@@ -25,5 +25,5 @@ pub fn release_data(data_name: &str) -> Result<String, Error> {
         return Ok(value);
     }
 
-    Err(Error::new(ErrorKind::NotFound, ""))
+    Err(error::Error::DataNotFound(data_name.to_string()))
 }
