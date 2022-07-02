@@ -3,6 +3,8 @@
 use std::io::ErrorKind;
 
 pub enum Error {
+    /// Give command with error
+    CommandError(String),
     /// Return data name not found
     DataNotFound(String),
     /// Return the file path not found
