@@ -2,4 +2,3 @@
 //! package manager.
 
 pub mod installer;
-pub mod pm;

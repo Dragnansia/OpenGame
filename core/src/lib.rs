@@ -5,3 +5,6 @@ pub mod error;
 pub mod os;
 pub mod package;
 pub mod utils;
+
+#[derive(Default, Debug)]
+pub struct OpenGame {}

@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+
+[dependencies.iced]
+version = "0.4.2"
+default-features = false
+features = ["default"]
+
+[dependencies.core]
+path = "../core"
