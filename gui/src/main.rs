@@ -1,27 +1,15 @@
-use core::OpenGame;
-use iced::{Column, Element, Sandbox, Settings};
+use eframe::{egui, run_native, App, NativeOptions};
 
-#[derive(Debug, Clone)]
-enum Message {}
+#[derive(Default)]
+struct OG;
 
-impl Sandbox for OpenGame {
-    type Message = Message;
-
-    fn new() -> Self {
-        Styling::default()
-    }
-
-    fn title(&self) -> String {
-        String::from("OpenGame")
-    }
-
-    fn update(&mut self, message: Self::Message) {}
-
-    fn view(&mut self) -> Element<Message> {
-        Column::new()
+impl App for OG {
+    fn update(&mut self, ctx: &eframe::egui::Context, _: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |_| {});
     }
 }
 
-fn main() -> iced::Result {
-    OpenGame::run(Settings::default())
+fn main() {
+    let options = NativeOptions::default();
+    run_native("OpenGame", options, Box::new(|_| Box::new(OG::default())));
 }
