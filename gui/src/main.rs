@@ -1,13 +1,8 @@
-use eframe::{egui, run_native, App, NativeOptions};
+mod og;
+mod view;
 
-#[derive(Default)]
-struct OG;
-
-impl App for OG {
-    fn update(&mut self, ctx: &eframe::egui::Context, _: &mut eframe::Frame) {
-        egui::CentralPanel::default().show(ctx, |_| {});
-    }
-}
+use eframe::{run_native, NativeOptions};
+use og::OG;
 
 fn main() {
     let options = NativeOptions::default();
