@@ -9,6 +9,8 @@ pub enum Error {
     DataNotFound(String),
     /// Return the file path not found
     FileNotFound(String),
+    /// Return the path not found
+    PathNotFound(String),
     Custom(String),
     Unknown,
 }
