@@ -6,5 +6,5 @@ use og::OG;
 
 fn main() {
     let options = NativeOptions::default();
-    run_native("OpenGame", options, Box::new(|_| Box::new(OG::default())));
+    run_native("OpenGame", options, Box::new(|_| Box::new(OG::new())));
 }

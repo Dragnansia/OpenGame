@@ -1,7 +1,10 @@
-use eframe::{egui::Context, Frame};
+use eframe::egui::Ui;
 
 /// Basic trait to display tab content
 pub trait View {
+    /// Return view name to display
+    fn name(&self) -> String;
+
     /// Update/Display view
-    fn update(&self, ctx: &Context, frame: &mut Frame);
+    fn update(&self, ui: &Ui);
 }
