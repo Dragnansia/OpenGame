@@ -1,10 +1,8 @@
-mod og;
-mod view;
+use iced::{Application, Settings};
+use og::OpenGame;
 
-use eframe::{run_native, NativeOptions};
-use og::OG;
+pub mod og;
 
-fn main() {
-    let options = NativeOptions::default();
-    run_native("OpenGame", options, Box::new(|_| Box::new(OG::new())));
+fn main() -> iced::Result {
+    OpenGame::run(Settings::default())
 }

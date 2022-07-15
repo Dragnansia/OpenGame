@@ -1,2 +1,0 @@
-[workspace]
-members = [ "tui", "core", "gui" ]
